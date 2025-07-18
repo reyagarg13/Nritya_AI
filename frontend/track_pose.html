@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Virtual Instructor - Flow Motion Studio</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <a href="home.html">Home</a>
+        <a href="choreography.html">Choreography</a>
+        <a href="track_pose.html" class="active">Virtual Instructor</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
+    </nav>
+    <main>
+        <h2>Virtual Instructor</h2>
+        <video id="video" autoplay muted playsinline style="width:400px; border-radius:10px;"></video>
+        <canvas id="poseCanvas" style="position:absolute; left:0; top:0;"></canvas>
+        <div>
+            <button id="startBtn">Start Tracking</button>
+            <button id="stopBtn">Stop Tracking</button>
+        </div>
+        <div id="poseResult"></div>
+    </main>
+    <script>
+        // Simple live tracking demo (no backend websocket, just /pose API)
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('poseCanvas');
+        const ctx = canvas.getContext('2d');
+        let tracking = false;
+        document.getElementById('startBtn').onclick = async () => {
+            tracking = true;
+            if (navigator.mediaDevices) {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                video.srcObject = stream;
+                video.onloadedmetadata = () => {
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    trackLoop();
+                };
+            }
+        };
+        document.getElementById('stopBtn').onclick = () => tracking = false;
+        async function trackLoop() {
+            if (!tracking) return;
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const imgData = canvas.toDataURL("image/jpeg");
+            try {
+                const res = await fetch('http://127.0.0.1:8000/pose', {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ image_data: imgData })
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    document.getElementById('poseResult').textContent = data.pose_analysis ? JSON.stringify(data.pose_analysis) : "No pose detected";
+                }
+            } catch {}
+            setTimeout(trackLoop, 1000);
+        }
+    </script>
+</body>
+</html>

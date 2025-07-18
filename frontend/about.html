@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>About - Nritya AI</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .about-section { margin-bottom: 32px; }
+        .team-list { list-style: none; padding: 0; }
+        .team-list li { margin-bottom: 10px; }
+        .heritage-block {
+            background: rgba(233,69,96,0.08);
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 24px;
+        }
+        .api-section {
+            background: rgba(242,113,33,0.07);
+            border-radius: 12px;
+            padding: 18px;
+            margin-top: 32px;
+        }
+        .api-section pre {
+            background: #181828;
+            color: #fff;
+            border-radius: 8px;
+            padding: 12px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="index.html" onclick="window.router.navigateTo('choreography');return false;">Choreography</a>
+        <a href="index.html" onclick="window.router.navigateTo('tracking');return false;">Live Tracking</a>
+        <a href="about.html" class="active">About</a>
+        <a href="index.html" onclick="window.router.navigateTo('gallery');return false;">Gallery</a>
+    </nav>
+    <main>
+        <div class="about-section">
+            <h2>About Nritya AI</h2>
+            <p>
+                <b>Nritya AI</b> is an innovative platform blending Indian dance heritage with modern AI.<br>
+                Our mission is to empower dancers, choreographers, and learners with real-time motion capture and creative choreography tools.
+            </p>
+        </div>
+        <div class="about-section">
+            <h3>Our Team</h3>
+            <ul class="team-list">
+                <li><b>Jane Doe</b> – Lead AI Engineer</li>
+                <li><b>Priya Sharma</b> – Dance Expert</li>
+                <li><b>Rahul Verma</b> – Full Stack Developer</li>
+                <li><b>Anjali Patel</b> – Community & Outreach</li>
+            </ul>
+        </div>
+        <div class="about-section heritage-block">
+            <h3>Indian Dance Heritage</h3>
+            <p>
+                Nritya AI celebrates the diversity of Indian dance forms, from classical Kathak and Bharatanatyam to Bollywood and contemporary styles.<br>
+                Our platform aims to preserve, teach, and innovate using technology, making dance accessible and interactive for everyone.
+            </p>
+            <ul>
+                <li>Bollywood: Vibrant, expressive, and energetic</li>
+                <li>Kathak: Graceful spins and intricate footwork</li>
+                <li>Hip-Hop: Urban, freestyle, and powerful</li>
+                <li>Contemporary: Fluid, creative, and modern</li>
+            </ul>
+        </div>
+        <div class="about-section">
+            <h3>Our Mission</h3>
+            <p>
+                To democratize dance education and creativity using AI.<br>
+                To support solo practice, group choreography, and teaching with real-time feedback and intelligent tools.
+            </p>
+        </div>
+        <div class="api-section">
+            <h3>About API</h3>
+            <button onclick="loadAboutApi()" class="btn">Show Backend About Info</button>
+            <div id="aboutApiResult" style="margin-top:12px;"></div>
+        </div>
+    </main>
+    <script>
+        function loadAboutApi() {
+            const resultDiv = document.getElementById('aboutApiResult');
+            resultDiv.textContent = "Loading...";
+            fetch("http://127.0.0.1:8000/about")
+                .then(r => r.json())
+                .then(data => {
+                    resultDiv.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                })
+                .catch(() => {
+                    resultDiv.textContent = "Could not load backend info.";
+                });
+        }
+    </script>
+</body>
+</html>

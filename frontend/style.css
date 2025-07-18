@@ -1,0 +1,61 @@
+body {
+    font-family: Arial, sans-serif;
+    background: #181828;
+    color: #fff;
+    margin: 0;
+    padding: 0;
+}
+nav {
+    background: #222;
+    padding: 12px 24px;
+    display: flex;
+    gap: 18px;
+}
+nav a {
+    color: #f27121;
+    text-decoration: none;
+    font-weight: bold;
+    padding: 6px 12px;
+    border-radius: 6px;
+}
+nav a.active, nav a:hover {
+    background: #e94560;
+    color: #fff;
+}
+main {
+    max-width: 700px;
+    margin: 40px auto;
+    background: #23234a;
+    padding: 32px;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px #0004;
+}
+.btn, button {
+    background: linear-gradient(45deg, #e94560, #f27121);
+    color: #fff;
+    border: none;
+    border-radius: 20px;
+    padding: 10px 24px;
+    font-weight: bold;
+    cursor: pointer;
+    margin: 8px 0;
+}
+.btn:hover, button:hover {
+    background: #f27121;
+}
+input, select, textarea {
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid #e94560;
+    margin: 4px 0 12px 0;
+    width: 100%;
+    background: #181828;
+    color: #fff;
+}
+label {
+    display: block;
+    margin-bottom: 8px;
+}
+h1, h2, h3 {
+    color: #f27121;
+}

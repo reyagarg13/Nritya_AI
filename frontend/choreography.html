@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Choreography Generator - Flow Motion Studio</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <a href="home.html">Home</a>
+        <a href="choreography.html" class="active">Choreography</a>
+        <a href="track_pose.html">Virtual Instructor</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
+    </nav>
+    <main>
+        <h2>Choreography Generator</h2>
+        <form id="choreoForm">
+            <label>Dance Style:
+                <select id="style">
+                    <option value="bollywood">Bollywood</option>
+                    <option value="kathak">Kathak</option>
+                    <option value="hiphop">Hip-Hop</option>
+                    <option value="contemporary">Contemporary</option>
+                </select>
+            </label>
+            <label>Duration (seconds):
+                <input type="number" id="duration" min="2" max="60" value="10">
+            </label>
+            <label>Tempo:
+                <select id="tempo">
+                    <option value="slow">Slow</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="fast">Fast</option>
+                </select>
+            </label>
+            <label>Complexity:
+                <select id="complexity">
+                    <option value="beginner">Beginner</option>
+                    <option value="intermediate" selected>Intermediate</option>
+                    <option value="advanced">Advanced</option>
+                </select>
+            </label>
+            <button type="submit">Generate</button>
+        </form>
+        <div id="choreoResult"></div>
+    </main>
+    <script>
+        const form = document.getElementById('choreoForm');
+        const resultDiv = document.getElementById('choreoResult');
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            resultDiv.textContent = "Loading...";
+            const style = document.getElementById('style').value;
+            const duration = parseInt(document.getElementById('duration').value);
+            const tempo = document.getElementById('tempo').value;
+            const complexity = document.getElementById('complexity').value;
+            try {
+                const res = await fetch('http://127.0.0.1:8000/choreography', {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ style, duration, tempo, complexity })
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    resultDiv.innerHTML = `<h3>Generated Sequence</h3>
+                        <ul>${data.sequence.map(
+                            move => `<li><b>${move.name}</b> (${move.adjusted_duration.toFixed(1)}s): <pre>${JSON.stringify(move.keyframes, null, 2)}</pre></li>`
+                        ).join('')}</ul>`;
+                } else {
+                    const err = await res.json();
+                    resultDiv.textContent = err.detail || "Error generating choreography.";
+                }
+            } catch (err) {
+                resultDiv.textContent = "Network error.";
+            }
+        };
+    </script>
+</body>
+</html>
