@@ -538,34 +538,114 @@
                     <div style="background:rgba(30,30,60,0.7); border-radius:18px; padding:24px;">
                         <h3 style="color:#f27121; margin-bottom:12px;">How it works</h3>
                         <ul style="font-size:1.05rem; line-height:1.7; color:#fff;">
-                            <li>Upload or select a reference dance video or pose.</li>
-                            <li>Or <b>choose a move from PhantomDance library</b> below.</li>
+                            <li>Select a dance style and move from PhantomDance library.</li>
+                            <li>Preview the reference animation and keyframes.</li>
                             <li>Start your webcam and follow the instructor's moves.</li>
-                            <li>Get real-time feedback and similarity scores.</li>
-                            <li>Practice, improve, and master your dance!</li>
+                            <li>Get real-time feedback on correctness, timing, and fluidity.</li>
                         </ul>
                         <div style="margin-top:18px;">
-                            <input type="file" id="instructorReferenceInput" accept="video/*,.json,application/json" style="display:none;">
-                            <button class="btn" id="instructorLoadBtn">Load Reference</button>
-                            <button class="btn secondary" id="instructorStartBtn">Start Instructor</button>
-                            <button class="btn secondary" id="instructorStopBtn">Stop</button>
+                            <label for="instructorStyleSelect" style="color:#f27121;">Dance Style:</label>
+                            <select id="instructorStyleSelect" style="width:100%;padding:8px;border-radius:8px;margin-top:8px;">
+                                <option value="">-- Select style --</option>
+                            </select>
                         </div>
                         <div style="margin-top:18px;">
-                            <label for="phantomDanceSelect" style="color:#f27121;">Or select from PhantomDance:</label>
-                            <select id="phantomDanceSelect" style="width:100%;padding:8px;border-radius:8px;margin-top:8px;">
-                                <option value="">-- Select a move --</option>
+                            <label for="instructorMoveSelect" style="color:#f27121;">Move:</label>
+                            <select id="instructorMoveSelect" style="width:100%;padding:8px;border-radius:8px;margin-top:8px;">
+                                <option value="">-- Select move --</option>
                             </select>
-                            <button class="btn" id="loadPhantomDanceBtn" style="margin-top:10px;">Load Selected Move</button>
+                            <button class="btn" id="previewInstructorMoveBtn" style="margin-top:10px;">Preview Move</button>
+                            <button class="btn" id="loadInstructorMoveBtn" style="margin-top:10px;">Load Move</button>
+                        </div>
+                        <div style="margin-top:18px;">
+                            <button class="btn" id="instructorStartBtn">Start Instructor</button>
+                            <button class="btn secondary" id="instructorStopBtn">Stop</button>
                         </div>
                         <div id="instructorStatus" style="margin-top:14px; color:#f27121;"></div>
                     </div>
                 </div>
                 <div style="flex:2 1 500px; min-width:320px;">
                     <div style="position:relative; background:rgba(30,30,60,0.7); border-radius:18px; padding:18px;">
+                        <canvas id="instructorReferenceCanvas" style="width:100%; border-radius:12px; background:#181818; margin-bottom:10px;"></canvas>
                         <video id="instructorVideo" style="width:100%; border-radius:12px; display:none;" controls></video>
                         <canvas id="instructorWebcam" style="width:100%; border-radius:12px; display:none;"></canvas>
                         <canvas id="instructorPoseCanvas" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none;"></canvas>
                         <div id="instructorFeedback" style="margin-top:12px; color:#f27121; text-align:center;"></div>
+                        <div id="instructorPreviewModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:2000; align-items:center; justify-content:center;">
+                            <div style="background:#222; border-radius:15px; padding:30px; max-width:600px; max-height:80vh; overflow:auto; color:white; position:relative;">
+                                <button id="closeInstructorPreviewBtn" style="position:absolute; top:10px; right:15px; background:none; border:none; color:#e94560; font-size:1.5rem; cursor:pointer;">&times;</button>
+                                <h3 style="color:#f27121; margin-bottom:15px;">Move Preview & Keyframes</h3>
+                                <div id="instructorPreviewContent"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- About Page -->
+    <div class="page" id="about">
+        <div class="container">
+            <h2 style="color:#f27121; text-align:center; margin-bottom:18px;">About Nritya AI</h2>
+            <div id="aboutContent" style="margin-bottom:32px;">
+                <div style="text-align:center; color:#aaa;">Loading...</div>
+            </div>
+            <div id="aboutTeam" style="margin-bottom:32px;"></div>
+            <div id="aboutPhantomDance" style="margin-bottom:32px;"></div>
+            <div id="aboutContact" style="margin-bottom:32px;"></div>
+        </div>
+    </div>
+
+    <!-- Virtual Dance Instructor Page -->
+    <div class="page" id="instructor">
+        <div class="container">
+            <h2 style="color:#f27121; text-align:center; margin-bottom:30px;">Virtual Dance Instructor</h2>
+            <div style="display:flex; flex-wrap:wrap; gap:32px;">
+                <div style="flex:1 1 350px; min-width:320px;">
+                    <div style="background:rgba(30,30,60,0.7); border-radius:18px; padding:24px;">
+                        <h3 style="color:#f27121; margin-bottom:12px;">How it works</h3>
+                        <ul style="font-size:1.05rem; line-height:1.7; color:#fff;">
+                            <li>Select a dance style and move from PhantomDance library.</li>
+                            <li>Preview the reference animation and keyframes.</li>
+                            <li>Start your webcam and follow the instructor's moves.</li>
+                            <li>Get real-time feedback on correctness, timing, and fluidity.</li>
+                        </ul>
+                        <div style="margin-top:18px;">
+                            <label for="instructorStyleSelect" style="color:#f27121;">Dance Style:</label>
+                            <select id="instructorStyleSelect" style="width:100%;padding:8px;border-radius:8px;margin-top:8px;">
+                                <option value="">-- Select style --</option>
+                            </select>
+                        </div>
+                        <div style="margin-top:18px;">
+                            <label for="instructorMoveSelect" style="color:#f27121;">Move:</label>
+                            <select id="instructorMoveSelect" style="width:100%;padding:8px;border-radius:8px;margin-top:8px;">
+                                <option value="">-- Select move --</option>
+                            </select>
+                            <button class="btn" id="previewInstructorMoveBtn" style="margin-top:10px;">Preview Move</button>
+                            <button class="btn" id="loadInstructorMoveBtn" style="margin-top:10px;">Load Move</button>
+                        </div>
+                        <div style="margin-top:18px;">
+                            <button class="btn" id="instructorStartBtn">Start Instructor</button>
+                            <button class="btn secondary" id="instructorStopBtn">Stop</button>
+                        </div>
+                        <div id="instructorStatus" style="margin-top:14px; color:#f27121;"></div>
+                    </div>
+                </div>
+                <div style="flex:2 1 500px; min-width:320px;">
+                    <div style="position:relative; background:rgba(30,30,60,0.7); border-radius:18px; padding:18px;">
+                        <canvas id="instructorReferenceCanvas" style="width:100%; border-radius:12px; background:#181818; margin-bottom:10px;"></canvas>
+                        <video id="instructorVideo" style="width:100%; border-radius:12px; display:none;" controls></video>
+                        <canvas id="instructorWebcam" style="width:100%; border-radius:12px; display:none;"></canvas>
+                        <canvas id="instructorPoseCanvas" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none;"></canvas>
+                        <div id="instructorFeedback" style="margin-top:12px; color:#f27121; text-align:center;"></div>
+                        <div id="instructorPreviewModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:2000; align-items:center; justify-content:center;">
+                            <div style="background:#222; border-radius:15px; padding:30px; max-width:600px; max-height:80vh; overflow:auto; color:white; position:relative;">
+                                <button id="closeInstructorPreviewBtn" style="position:absolute; top:10px; right:15px; background:none; border:none; color:#e94560; font-size:1.5rem; cursor:pointer;">&times;</button>
+                                <h3 style="color:#f27121; margin-bottom:15px;">Move Preview & Keyframes</h3>
+                                <div id="instructorPreviewContent"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1269,227 +1349,107 @@
             }
         }
 
-        // --- Enhanced Virtual Dance Instructor Pose Feedback Integration ---
+        // --- Enhanced Virtual Dance Instructor ---
         class VirtualDanceInstructor {
             constructor() {
                 this.reference = null;
-                this.webcamStream = null;
                 this.isRunning = false;
-                this.pose = null;
                 this.expectedLandmarks = null;
-                this.lastScore = null;
-                this.lastFeedback = null;
-                this.lastDetails = null;
                 this.poseInstance = null;
                 this.camera = null;
+                this.styles = [];
+                this.moves = {};
+                this.motionLabels = [];
             }
 
-            init() {
-                document.getElementById('instructorLoadBtn').onclick = () => this.loadReference();
+            async init() {
+                await this.populateStyleSelect();
+                document.getElementById('instructorStyleSelect').onchange = () => this.populateEnhancedMotionDropdown();
+                document.getElementById('instructorMoveSelect').onchange = () => this.clearStatus();
+                document.getElementById('previewInstructorMoveBtn').onclick = () => this.previewMove();
+                document.getElementById('closeInstructorPreviewBtn').onclick = () => this.closePreview();
+                document.getElementById('loadInstructorMoveBtn').onclick = () => this.loadSelectedMove();
                 document.getElementById('instructorStartBtn').onclick = () => this.start();
                 document.getElementById('instructorStopBtn').onclick = () => this.stop();
-                document.getElementById('loadPhantomDanceBtn').onclick = () => this.loadPhantomDanceMove();
                 document.getElementById('instructorStatus').textContent = '';
                 document.getElementById('instructorFeedback').textContent = '';
                 document.getElementById('instructorVideo').style.display = 'none';
                 document.getElementById('instructorWebcam').style.display = 'none';
+                document.getElementById('instructorReferenceCanvas').style.display = '';
                 this.expectedLandmarks = null;
-                this.populatePhantomDanceSelect();
+                this.referenceAnimation = null;
             }
 
-            async populatePhantomDanceSelect() {
-                const select = document.getElementById('phantomDanceSelect');
-                select.innerHTML = `<option value="">-- Select a move --</option>`;
+            async populateStyleSelect() {
+                const styleSelect = document.getElementById('instructorStyleSelect');
+                styleSelect.innerHTML = `<option value="">-- Select style --</option>`;
                 try {
-                    // Fetch available styles and moves from backend
-                    const stylesRes = await fetch(`${BACKEND_URL}/choreography/styles`);
-                    const stylesData = await stylesRes.json();
-                    for (const style of stylesData.styles) {
-                        const movesRes = await fetch(`${BACKEND_URL}/choreography/preview`, {
-                            method: "POST",
-                            headers: {"Content-Type": "application/json"},
-                            body: JSON.stringify({ style })
-                        });
-                        const movesData = await movesRes.json();
-                        if (movesData.moves && movesData.moves.length > 0) {
-                            for (const move of movesData.moves) {
-                                // Only add if move has landmarks
-                                if (move.landmarks && move.landmarks.length > 0) {
-                                    const opt = document.createElement('option');
-                                    opt.value = JSON.stringify({landmarks: move.landmarks, name: move.name, style});
-                                    opt.textContent = `${style} - ${move.name}`;
-                                    select.appendChild(opt);
-                                }
-                            }
-                        }
+                    const res = await fetch(`${BACKEND_URL}/choreography/styles`);
+                    const data = await res.json();
+                    this.styles = data.styles;
+                    for (const style of this.styles) {
+                        const opt = document.createElement('option');
+                        opt.value = style;
+                        opt.textContent = style.charAt(0).toUpperCase() + style.slice(1);
+                        styleSelect.appendChild(opt);
                     }
                 } catch {
-                    // fallback: do nothing
+                    styleSelect.innerHTML += `<option value="bollywood">Bollywood</option>
+                        <option value="kathak">Kathak</option>
+                        <option value="hiphop">Hip-Hop</option>
+                        <option value="contemporary">Contemporary</option>
+                        <option value="ballet">Ballet</option>`;
+                }
+                await this.populateEnhancedMotionDropdown();
+            }
+
+            async populateEnhancedMotionDropdown() {
+                const style = document.getElementById('instructorStyleSelect').value;
+                const moveSelect = document.getElementById('instructorMoveSelect');
+                moveSelect.innerHTML = `<option value="">-- Select move --</option>`;
+                if (!style) return;
+                try {
+                    // Get unique motion labels from backend (enhanced: add description, icon, etc.)
+                    const res = await fetch(`${BACKEND_URL}/choreography/motions?style=${encodeURIComponent(style)}&enhanced=1`);
+                    const data = await res.json();
+                    this.motionLabels = data.motions || [];
+                    for (const motion of this.motionLabels) {
+                        const opt = document.createElement('option');
+                        opt.value = motion.value;
+                        opt.textContent = motion.label + (motion.desc ? ` - ${motion.desc}` : "");
+                        if (motion.icon) opt.textContent = `${motion.icon} ${opt.textContent}`;
+                        moveSelect.appendChild(opt);
+                    }
+                } catch {
+                    moveSelect.innerHTML += `<option value="">No moves found</option>`;
                 }
             }
 
-            loadPhantomDanceMove() {
-                const select = document.getElementById('phantomDanceSelect');
-                const val = select.value;
-                if (!val) {
-                    document.getElementById('instructorStatus').textContent = 'Select a move from PhantomDance.';
+            // When user selects a move, fetch full move data from backend
+            async loadSelectedMove() {
+                const style = document.getElementById('instructorStyleSelect').value;
+                const moveName = document.getElementById('instructorMoveSelect').value;
+                if (!style || !moveName) {
+                    document.getElementById('instructorStatus').textContent = 'Select a style and move.';
                     return;
                 }
                 try {
-                    const obj = JSON.parse(val);
-                    if (obj.landmarks && obj.landmarks.length > 0) {
-                        this.reference = { type: 'pose', landmarks: obj.landmarks, name: obj.name, style: obj.style };
-                        this.expectedLandmarks = obj.landmarks;
-                        document.getElementById('instructorStatus').textContent = `Loaded: ${obj.style} - ${obj.name}`;
+                    const res = await fetch(`${BACKEND_URL}/choreography/move?style=${encodeURIComponent(style)}&name=${encodeURIComponent(moveName)}`);
+                    const move = await res.json();
+                    if (move.landmarks && move.landmarks.length > 0) {
+                        this.reference = { type: 'pose', landmarks: move.landmarks, name: move.name, style: move.style };
+                        this.expectedLandmarks = move.landmarks;
+                        document.getElementById('instructorStatus').textContent = `Loaded: ${move.name}`;
+                        this.showReferenceAnimation(move);
                     } else {
-                        document.getElementById('instructorStatus').textContent = 'Invalid move data.';
+                        document.getElementById('instructorStatus').textContent = 'Selected move has no reference pose.';
                     }
                 } catch {
                     document.getElementById('instructorStatus').textContent = 'Could not load move.';
                 }
             }
 
-            loadReference() {
-                const input = document.getElementById('instructorReferenceInput');
-                input.onchange = async (e) => {
-                    const file = e.target.files[0];
-                    if (!file) return;
-                    if (file.type === 'application/json' || file.name.endsWith('.json')) {
-                        const text = await file.text();
-                        try {
-                            const data = JSON.parse(text);
-                            if (data.landmarks && data.landmarks.length > 0) {
-                                this.reference = { type: 'pose', landmarks: data.landmarks };
-                                this.expectedLandmarks = data.landmarks;
-                                document.getElementById('instructorStatus').textContent = 'Reference pose loaded.';
-                            } else {
-                                document.getElementById('instructorStatus').textContent = 'Invalid pose file.';
-                            }
-                        } catch {
-                            document.getElementById('instructorStatus').textContent = 'Invalid JSON file.';
-                        }
-                    } else {
-                        document.getElementById('instructorStatus').textContent = 'Please upload a pose JSON file.';
-                    }
-                };
-                input.value = '';
-                input.click();
-            }
-
-            async start() {
-                if (this.isRunning) return;
-                if (!this.expectedLandmarks) {
-                    document.getElementById('instructorStatus').textContent = 'Load a reference pose first.';
-                    return;
-                }
-                this.isRunning = true;
-                document.getElementById('instructorStatus').textContent = 'Starting webcam and pose estimation...';
-                const webcam = document.getElementById('instructorWebcam');
-                webcam.style.display = '';
-                webcam.width = 640;
-                webcam.height = 480;
-
-                // Setup MediaPipe Pose
-                if (!this.poseInstance) {
-                    this.poseInstance = new Pose.Pose({
-                        locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.5/${file}`
-                    });
-                    this.poseInstance.setOptions({
-                        modelComplexity: 1,
-                        smoothLandmarks: true,
-                        enableSegmentation: false,
-                        minDetectionConfidence: 0.5,
-                        minTrackingConfidence: 0.5
-                    });
-                    this.poseInstance.onResults((results) => this.onPoseResults(results));
-                }
-
-                // Setup camera
-                const videoElement = document.createElement('video');
-                videoElement.style.display = 'none';
-                document.body.appendChild(videoElement);
-                this.camera = new CameraUtils.Camera(videoElement, {
-                    onFrame: async () => {
-                        await this.poseInstance.send({image: videoElement});
-                    },
-                    width: 640,
-                    height: 480
-                });
-                this.camera.start();
-
-                // Draw webcam to canvas
-                const ctx = webcam.getContext('2d');
-                const draw = () => {
-                    if (!this.isRunning) return;
-                    ctx.clearRect(0, 0, webcam.width, webcam.height);
-                    if (videoElement.readyState >= 2) {
-                        ctx.drawImage(videoElement, 0, 0, webcam.width, webcam.height);
-                    }
-                    // Draw per-joint feedback if available
-                    if (this.lastDetails && this.lastDetails.joint_feedback) {
-                        this.lastDetails.joint_feedback.forEach(jf => {
-                            const {user, distance} = jf;
-                            if (user && user.x && user.y && distance > 0.12) {
-                                ctx.beginPath();
-                                ctx.arc(user.x * webcam.width, user.y * webcam.height, 10, 0, 2 * Math.PI);
-                                ctx.strokeStyle = "#e94560";
-                                ctx.lineWidth = 3;
-                                ctx.stroke();
-                            }
-                        });
-                    }
-                    requestAnimationFrame(draw);
-                };
-                draw();
-                document.getElementById('instructorStatus').textContent = 'Webcam and pose estimation started.';
-            }
-
-            async onPoseResults(results) {
-                if (!this.isRunning) return;
-                if (results.poseLandmarks && this.expectedLandmarks) {
-                    // Prepare user landmarks in backend format
-                    const userLandmarks = results.poseLandmarks.map((lm, i) => ({
-                        id: i,
-                        x: lm.x,
-                        y: lm.y,
-                        z: lm.z,
-                        visibility: lm.visibility
-                    }));
-                    // Send to backend for feedback
-                    try {
-                        const res = await fetch(`${BACKEND_URL}/feedback`, {
-                            method: "POST",
-                            headers: {"Content-Type": "application/json"},
-                            body: JSON.stringify({
-                                user_landmarks: userLandmarks,
-                                expected_landmarks: this.expectedLandmarks
-                            })
-                        });
-                        if (res.ok) {
-                            const data = await res.json();
-                            this.lastScore = data.score;
-                            this.lastFeedback = data.feedback;
-                            this.lastDetails = data.details;
-                            document.getElementById('instructorFeedback').innerHTML =
-                                `<b>Score:</b> ${data.score}%<br>
-                                 <span>${data.feedback}</span>
-                                 <br><small>Avg dist: ${data.details.avg_distance.toFixed(3)}, Cosine: ${data.details.cosine_similarity.toFixed(2)}</small>`;
-                        }
-                    } catch (e) {
-                        document.getElementById('instructorFeedback').textContent = "Feedback error.";
-                    }
-                }
-            }
-
-            stop() {
-                this.isRunning = false;
-                if (this.camera) {
-                    this.camera.stop();
-                    this.camera = null;
-                }
-                document.getElementById('instructorWebcam').style.display = 'none';
-                document.getElementById('instructorStatus').textContent = 'Stopped.';
-            }
+            // ...existing code...
         }
 
         // Initialize Application

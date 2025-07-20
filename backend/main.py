@@ -671,7 +671,6 @@ async def preview_choreography_moves(
     if PHANTOMDANCE and "styles" in PHANTOMDANCE and style in PHANTOMDANCE["styles"]:
         moves = PHANTOMDANCE["styles"][style]
         return {"style": style, "moves": moves, "total_moves": len(moves), "source": "phantomdance"}
-    # ...existing code...
     if style not in choreography_generator.pose_sequences:
         raise HTTPException(status_code=400, detail=f"Style '{style}' not supported")
     moves = choreography_generator.pose_sequences[style]
@@ -684,6 +683,61 @@ async def get_available_styles():
         "styles": list(choreography_generator.pose_sequences.keys()),
         "total": len(choreography_generator.pose_sequences)
     }
+
+@app.get("/choreography/motions")
+async def get_motion_labels(style: str, enhanced: Optional[int] = 0):
+    """
+    Get unique motion labels (move names) for a given style.
+    If enhanced=1, add description/icon for dropdown.
+    Returns: [{label: "Kick", value: "kick", desc: "...", icon: "🦵"}, ...]
+    """
+    motions = []
+    # Use built-in moves only, not PhantomDance
+    moves = choreography_generator.pose_sequences.get(style, [])
+    seen = set()
+    # Example: add icons/descriptions for some common moves
+    ICONS = {
+        "kick": "🦵", "spin": "🔄", "slide": "🕺", "bodywave": "🌊", "handroll": "🤲",
+        "thumka": "💃", "bhangra arms": "👐", "pop & lock": "🧊", "wave": "🌊", "freeze": "❄️",
+        "spiral": "🌀", "leap": "🦘", "floor work": "🛏️"
+    }
+    DESCS = {
+        "kick": "Energetic leg kick", "spin": "360° rotation", "slide": "Smooth side movement",
+        "bodywave": "Wave through body", "handroll": "Rolling hand gesture",
+        "thumka": "Hip movement", "bhangra arms": "Upward arm bounce", "pop & lock": "Sharp isolation",
+        "wave": "Fluid arm wave", "freeze": "Sudden stop", "spiral": "Twisting motion",
+        "leap": "Jump in air", "floor work": "Dance on floor"
+    }
+    for move in moves:
+        name = move.get("name", "")
+        if name and name.lower() not in seen:
+            label = name
+            value = name
+            desc = DESCS.get(name.lower(), "")
+            icon = ICONS.get(name.lower(), "")
+            if enhanced:
+                motions.append({"label": label, "value": value, "desc": desc, "icon": icon})
+            else:
+                motions.append({"label": label, "value": value})
+            seen.add(name.lower())
+    return {"motions": motions, "total": len(motions)}
+
+@app.get("/choreography/move")
+async def get_move(style: str, name: str):
+    """
+    Get full move data for a given style and move name from PhantomDance.
+    """
+    if PHANTOMDANCE and "styles" in PHANTOMDANCE and style in PHANTOMDANCE["styles"]:
+        moves = PHANTOMDANCE["styles"][style]
+        for move in moves:
+            if move.get("name", "") == name:
+                return move
+    # fallback: use built-in moves
+    moves = choreography_generator.pose_sequences.get(style, [])
+    for move in moves:
+        if move.get("name", "") == name:
+            return move
+    raise HTTPException(status_code=404, detail="Move not found")
 
 @app.get("/about")
 async def about_info():
