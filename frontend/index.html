@@ -1408,19 +1408,50 @@
                 const moveSelect = document.getElementById('instructorMoveSelect');
                 moveSelect.innerHTML = `<option value="">-- Select move --</option>`;
                 if (!style) return;
+                let moves = [];
+                // Try PhantomDance preview first
                 try {
-                    // Get unique motion labels from backend (enhanced: add description, icon, etc.)
-                    const res = await fetch(`${BACKEND_URL}/choreography/motions?style=${encodeURIComponent(style)}&enhanced=1`);
+                    const res = await fetch(`${BACKEND_URL}/choreography/preview`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ style })
+                    });
                     const data = await res.json();
-                    this.motionLabels = data.motions || [];
-                    for (const motion of this.motionLabels) {
-                        const opt = document.createElement('option');
-                        opt.value = motion.value;
-                        opt.textContent = motion.label + (motion.desc ? ` - ${motion.desc}` : "");
-                        if (motion.icon) opt.textContent = `${motion.icon} ${opt.textContent}`;
-                        moveSelect.appendChild(opt);
+                    if (data.moves && Array.isArray(data.moves) && data.moves.length > 0) {
+                        moves = data.moves.map(move => ({
+                            name: move.name,
+                            duration: move.duration
+                        }));
                     }
-                } catch {
+                } catch {}
+                // If no moves found, fallback to built-in motions endpoint
+                if (moves.length === 0) {
+                    try {
+                        const res2 = await fetch(`${BACKEND_URL}/choreography/motions?style=${encodeURIComponent(style)}&enhanced=1`);
+                        const data2 = await res2.json();
+                        if (data2.motions && Array.isArray(data2.motions)) {
+                            moves = data2.motions.map(m => ({
+                                name: m.label,
+                                duration: undefined,
+                                desc: m.desc,
+                                icon: m.icon
+                            }));
+                        }
+                    } catch {}
+                }
+                // Deduplicate by name
+                const seen = new Set();
+                for (const move of moves) {
+                    if (!move.name || seen.has(move.name)) continue;
+                    const opt = document.createElement('option');
+                    opt.value = move.name;
+                    opt.textContent = (move.icon ? move.icon + " " : "") + move.name +
+                        (move.duration ? ` (${move.duration}s)` : "") +
+                        (move.desc ? ` - ${move.desc}` : "");
+                    moveSelect.appendChild(opt);
+                    seen.add(move.name);
+                }
+                if (moveSelect.options.length === 1) {
                     moveSelect.innerHTML += `<option value="">No moves found</option>`;
                 }
             }
