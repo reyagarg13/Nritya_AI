@@ -1360,6 +1360,10 @@
                 this.styles = [];
                 this.moves = {};
                 this.motionLabels = [];
+                this.lastSimilarity = null;
+                this.similarityHistory = [];
+                this.feedbackDetails = null;
+                this.feedbackTimer = null;
             }
 
             async init() {
@@ -1378,6 +1382,10 @@
                 document.getElementById('instructorReferenceCanvas').style.display = '';
                 this.expectedLandmarks = null;
                 this.referenceAnimation = null;
+                this.similarityHistory = [];
+                this.feedbackDetails = null;
+                this.renderFeedbackChart();
+                this.renderDetailedFeedback();
             }
 
             async populateStyleSelect() {
@@ -1409,29 +1417,24 @@
                 moveSelect.innerHTML = `<option value="">-- Select move --</option>`;
                 if (!style) return;
                 try {
-                    // Fetch moves from /choreography/preview endpoint
                     const res = await fetch(`${BACKEND_URL}/choreography/preview`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ style })
                     });
                     const data = await res.json();
-                    // Support both array of moves and object with moves property
                     let moves = [];
                     if (Array.isArray(data)) {
                         moves = data;
                     } else if (Array.isArray(data.moves)) {
                         moves = data.moves;
                     }
-                    // Try to extract move names from different possible structures
                     if (moves.length > 0) {
                         for (const move of moves) {
-                            // Accept both {name: "..."} and string values
                             let moveName = typeof move === "string" ? move : move.name || move.label || move.motion || "";
                             if (!moveName) continue;
                             const opt = document.createElement('option');
                             opt.value = moveName;
-                            // Try to show duration if present
                             let duration = move.duration || (move.meta && move.meta.duration) || "";
                             opt.textContent = moveName + (duration ? ` (${duration}s)` : "");
                             moveSelect.appendChild(opt);
@@ -1444,8 +1447,14 @@
                 }
             }
 
-            // When user selects a move, fetch full move data from backend
-            async loadSelectedMove() {
+            clearStatus() {
+                document.getElementById('instructorStatus').textContent = '';
+                document.getElementById('instructorFeedback').textContent = '';
+                this.similarityHistory = [];
+                this.renderFeedbackChart();
+            }
+
+            async previewMove() {
                 const style = document.getElementById('instructorStyleSelect').value;
                 const moveName = document.getElementById('instructorMoveSelect').value;
                 if (!style || !moveName) {
@@ -1455,20 +1464,327 @@
                 try {
                     const res = await fetch(`${BACKEND_URL}/choreography/move?style=${encodeURIComponent(style)}&name=${encodeURIComponent(moveName)}`);
                     const move = await res.json();
-                    if (move.landmarks && move.landmarks.length > 0) {
+                    if (move.keyframes && move.keyframes.length > 0) {
+                        const previewModal = document.getElementById('instructorPreviewModal');
+                        const previewContent = document.getElementById('instructorPreviewContent');
+                        previewContent.innerHTML = `
+                            <b style="color:#f27121;">${move.name}</b>
+                            <div style="font-size:0.95em; margin-bottom:4px;">Duration: ${move.duration || ""}s</div>
+                            <div style="font-size:0.93em; color:#aaa;">
+                                Keyframes:
+                                <pre style="background:#181818; color:#fff; border-radius:7px; padding:7px; font-size:0.92em; overflow-x:auto;">${JSON.stringify(move.keyframes, null, 2)}</pre>
+                            </div>
+                        `;
+                        previewModal.style.display = 'flex';
+                    } else {
+                        document.getElementById('instructorStatus').textContent = 'No keyframes for this move.';
+                    }
+                } catch {
+                    document.getElementById('instructorStatus').textContent = 'Could not load move preview.';
+                }
+            }
+
+            closePreview() {
+                document.getElementById('instructorPreviewModal').style.display = 'none';
+            }
+
+            async loadSelectedMove() {
+                const style = document.getElementById('instructorStyleSelect').value;
+                const moveName = document.getElementById('instructorMoveSelect').value;
+                if (!style || !moveName) {
+                    document.getElementById('instructorStatus').textContent = 'Select a style and move.';
+                    this.expectedLandmarks = null;
+                    return;
+                }
+                try {
+                    const res = await fetch(`${BACKEND_URL}/choreography/move?style=${encodeURIComponent(style)}&name=${encodeURIComponent(moveName)}`);
+                    if (!res.ok) {
+                        const err = await res.json().catch(() => ({}));
+                        document.getElementById('instructorStatus').textContent = err.detail ? `Error: ${err.detail}` : 'Could not load move.';
+                        this.expectedLandmarks = null;
+                        return;
+                    }
+                    const move = await res.json();
+                    if (move.landmarks && Array.isArray(move.landmarks) && move.landmarks.length > 0) {
                         this.reference = { type: 'pose', landmarks: move.landmarks, name: move.name, style: move.style };
                         this.expectedLandmarks = move.landmarks;
                         document.getElementById('instructorStatus').textContent = `Loaded: ${move.name}`;
                         this.showReferenceAnimation(move);
+                    } else if (move.keyframes && Array.isArray(move.keyframes) && move.keyframes.length > 0) {
+                        this.reference = { type: 'keyframes', keyframes: move.keyframes, name: move.name, style: move.style };
+                        this.expectedLandmarks = Array.from({length: 33}, () => ({x: 0, y: 0, z: 0, visibility: 0}));
+                        document.getElementById('instructorStatus').textContent = `Loaded: ${move.name} (keyframes only)`;
+                        this.showReferenceAnimation(move);
                     } else {
-                        document.getElementById('instructorStatus').textContent = 'Selected move has no reference pose.';
+                        document.getElementById('instructorStatus').textContent = 'Selected move has no reference pose or keyframes.';
+                        this.expectedLandmarks = null;
                     }
-                } catch {
+                } catch (err) {
                     document.getElementById('instructorStatus').textContent = 'Could not load move.';
+                    this.expectedLandmarks = null;
                 }
             }
 
-            // ...existing code...
+            showReferenceAnimation(move) {
+                // Enhanced: Draw stick figure if landmarks exist, else show move name
+                const canvas = document.getElementById('instructorReferenceCanvas');
+                const ctx = canvas.getContext('2d');
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                if (move.landmarks && Array.isArray(move.landmarks) && move.landmarks.length > 0) {
+                    // Draw landmarks as stick figure
+                    this.drawStickFigure(ctx, move.landmarks, canvas.width, canvas.height);
+                } else {
+                    ctx.fillStyle = '#f27121';
+                    ctx.font = '24px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(move.name, canvas.width / 2, canvas.height / 2);
+                }
+            }
+
+            drawStickFigure(ctx, landmarks, width, height) {
+                // Simple stick figure drawing using MediaPipe connections
+                const connections = [
+                    [11, 13], [13, 15], [12, 14], [14, 16], // arms
+                    [11, 12], // shoulders
+                    [23, 24], // hips
+                    [11, 23], [12, 24], // torso
+                    [23, 25], [25, 27], [24, 26], [26, 28], // legs
+                    [27, 31], [28, 32], // feet
+                ];
+                ctx.save();
+                ctx.strokeStyle = "#f27121";
+                ctx.lineWidth = 4;
+                // Scale normalized landmarks to canvas
+                const pts = landmarks.map(lm => ({
+                    x: lm.x * width,
+                    y: lm.y * height
+                }));
+                // Draw lines
+                for (const [a, b] of connections) {
+                    if (pts[a] && pts[b]) {
+                        ctx.beginPath();
+                        ctx.moveTo(pts[a].x, pts[a].y);
+                        ctx.lineTo(pts[b].x, pts[b].y);
+                        ctx.stroke();
+                    }
+                }
+                // Draw joints
+                ctx.fillStyle = "#e94560";
+                for (const pt of pts) {
+                    ctx.beginPath();
+                    ctx.arc(pt.x, pt.y, 6, 0, 2 * Math.PI);
+                    ctx.fill();
+                }
+                ctx.restore();
+            }
+
+            async start() {
+                if (this.isRunning) return;
+                if (!Array.isArray(this.expectedLandmarks) || this.expectedLandmarks.length === 0) {
+                    document.getElementById('instructorStatus').textContent = 'Load a move first.';
+                    return;
+                }
+                this.isRunning = true;
+                document.getElementById('instructorStatus').textContent = 'Instructor started. Please allow webcam access.';
+                await this.startWebcam();
+            }
+
+            async startWebcam() {
+                const video = document.getElementById('instructorVideo');
+                const webcamCanvas = document.getElementById('instructorWebcam');
+                const poseCanvas = document.getElementById('instructorPoseCanvas');
+                video.style.display = 'none';
+                webcamCanvas.style.display = '';
+                poseCanvas.style.display = '';
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    video.srcObject = stream;
+                    video.play();
+                    webcamCanvas.width = video.videoWidth || 640;
+                    webcamCanvas.height = video.videoHeight || 480;
+                    poseCanvas.width = webcamCanvas.width;
+                    poseCanvas.height = webcamCanvas.height;
+                    this.similarityHistory = [];
+                    this.feedbackDetails = null;
+                    this.runPoseDetection(video, webcamCanvas, poseCanvas);
+                } catch (e) {
+                    document.getElementById('instructorStatus').textContent = 'Webcam access denied.';
+                    this.isRunning = false;
+                }
+            }
+
+            async runPoseDetection(video, webcamCanvas, poseCanvas) {
+                if (!window.Pose) {
+                    document.getElementById('instructorStatus').textContent = 'MediaPipe Pose not loaded.';
+                    return;
+                }
+                const pose = new window.Pose({
+                    locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.5/${file}`
+                });
+                pose.setOptions({
+                    modelComplexity: 1,
+                    smoothLandmarks: true,
+                    enableSegmentation: false,
+                    minDetectionConfidence: 0.5,
+                    minTrackingConfidence: 0.5
+                });
+                pose.onResults(async (results) => {
+                    const ctx = webcamCanvas.getContext('2d');
+                    ctx.clearRect(0, 0, webcamCanvas.width, webcamCanvas.height);
+                    ctx.drawImage(video, 0, 0, webcamCanvas.width, webcamCanvas.height);
+                    if (results.poseLandmarks) {
+                        window.drawLandmarks(ctx, results.poseLandmarks, "#f27121");
+                        // Compare with expectedLandmarks
+                        const liveLandmarks = results.poseLandmarks.map(lm => ({
+                            x: lm.x,
+                            y: lm.y,
+                            z: lm.z || 0,
+                            visibility: lm.visibility
+                        }));
+                        const sim = window.compareLandmarks(
+                            liveLandmarks,
+                            this.expectedLandmarks
+                        );
+                        this.lastSimilarity = sim;
+                        this.similarityHistory.push(sim);
+                        if (this.similarityHistory.length > 30) this.similarityHistory.shift();
+                        this.renderFeedbackChart();
+
+                        // Enhanced: Call backend for detailed feedback every 1s
+                        if (!this.feedbackTimer) {
+                            this.feedbackTimer = setInterval(() => {
+                                this.sendDetailedFeedback(liveLandmarks, this.expectedLandmarks);
+                            }, 1000);
+                        }
+
+                        let msg = '';
+                        if (sim > 0.85) msg = 'Great! Your pose matches the instructor!';
+                        else if (sim > 0.65) msg = 'Good! Try to match the pose more closely.';
+                        else msg = 'Keep practicing to match the instructor pose!';
+                        document.getElementById('instructorFeedback').innerHTML =
+                            `<b>Similarity:</b> ${(sim*100).toFixed(1)}%<br>${msg}`;
+                    }
+                });
+                const camera = new window.Camera(video, {
+                    onFrame: async () => {
+                        await pose.send({ image: video });
+                    },
+                    width: webcamCanvas.width,
+                    height: webcamCanvas.height
+                });
+                camera.start();
+                this.poseInstance = pose;
+                this.camera = camera;
+            }
+
+            async sendDetailedFeedback(userLandmarks, expectedLandmarks) {
+                // Only send if both are valid and not all zeros
+                if (!userLandmarks || !expectedLandmarks || userLandmarks.length !== expectedLandmarks.length) return;
+                if (userLandmarks.every(lm => !lm.x && !lm.y && !lm.z)) return;
+                try {
+                    const res = await fetch(`${BACKEND_URL}/feedback`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            user_landmarks: userLandmarks,
+                            expected_landmarks: expectedLandmarks
+                        })
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        this.feedbackDetails = data;
+                        this.renderDetailedFeedback();
+                    }
+                } catch {}
+            }
+
+            renderFeedbackChart() {
+                // Add a simple sparkline chart for similarity history
+                let chartId = "instructorFeedbackChart";
+                let chartDiv = document.getElementById(chartId);
+                if (!chartDiv) {
+                    chartDiv = document.createElement("div");
+                    chartDiv.id = chartId;
+                    chartDiv.style.margin = "10px 0";
+                    chartDiv.style.height = "40px";
+                    chartDiv.style.width = "100%";
+                    chartDiv.style.background = "#181818";
+                    chartDiv.style.borderRadius = "8px";
+                    chartDiv.style.display = "flex";
+                    chartDiv.style.alignItems = "flex-end";
+                    chartDiv.style.justifyContent = "center";
+                    document.getElementById('instructorFeedback').appendChild(chartDiv);
+                }
+                chartDiv.innerHTML = "";
+                const history = this.similarityHistory;
+                if (!history || history.length === 0) {
+                    chartDiv.innerHTML = "<span style='color:#aaa;font-size:0.9em;'>No feedback yet</span>";
+                    return;
+                }
+                const max = 1, min = 0;
+                const w = chartDiv.offsetWidth || 200;
+                const h = chartDiv.offsetHeight || 40;
+                const barW = Math.max(2, Math.floor(w / history.length));
+                for (let i = 0; i < history.length; ++i) {
+                    const val = history[i];
+                    const bar = document.createElement("div");
+                    bar.style.display = "inline-block";
+                    bar.style.width = barW + "px";
+                    bar.style.height = ((val - min) / (max - min) * h) + "px";
+                    bar.style.marginRight = "1px";
+                    bar.style.background = val > 0.85 ? "#4caf50" : val > 0.65 ? "#ffc107" : "#e94560";
+                    bar.title = (val*100).toFixed(1) + "%";
+                    chartDiv.appendChild(bar);
+                }
+            }
+
+            renderDetailedFeedback() {
+                // Show detailed feedback below the chart if available
+                let detailsDiv = document.getElementById("instructorFeedbackDetails");
+                if (!detailsDiv) {
+                    detailsDiv = document.createElement("div");
+                    detailsDiv.id = "instructorFeedbackDetails";
+                    detailsDiv.style.margin = "8px 0 0 0";
+                    detailsDiv.style.fontSize = "0.98em";
+                    detailsDiv.style.color = "#fff";
+                    document.getElementById('instructorFeedback').appendChild(detailsDiv);
+                }
+                if (!this.feedbackDetails || !this.feedbackDetails.details) {
+                    detailsDiv.innerHTML = "";
+                    return;
+                }
+                const { score, feedback, details } = this.feedbackDetails;
+                let html = `<div style="color:#f27121;"><b>AI Feedback:</b> ${feedback} <span style="color:#aaa;">(Score: ${score})</span></div>`;
+                if (details && details.joint_feedback && details.joint_feedback.length > 0) {
+                    // Show top 2 joints needing improvement
+                    const sorted = [...details.joint_feedback].sort((a, b) => b.distance - a.distance);
+                    html += `<div style="margin-top:6px;">`;
+                    for (let i = 0; i < Math.min(2, sorted.length); ++i) {
+                        const j = sorted[i];
+                        if (j.distance < 0.07) continue;
+                        html += `<span style="color:#e94560;">${j.landmark}:</span> <span style="color:#ffc107;">${j.distance.toFixed(2)}</span> `;
+                    }
+                    html += `</div>`;
+                }
+                detailsDiv.innerHTML = html;
+            }
+
+            stop() {
+                this.isRunning = false;
+                if (this.camera && this.camera.stop) this.camera.stop();
+                if (this.feedbackTimer) {
+                    clearInterval(this.feedbackTimer);
+                    this.feedbackTimer = null;
+                }
+                document.getElementById('instructorStatus').textContent = 'Instructor stopped.';
+                document.getElementById('instructorFeedback').textContent = '';
+                document.getElementById('instructorWebcam').style.display = 'none';
+                document.getElementById('instructorPoseCanvas').style.display = 'none';
+                this.similarityHistory = [];
+                this.feedbackDetails = null;
+                this.renderFeedbackChart();
+                this.renderDetailedFeedback();
+            }
         }
 
         // Initialize Application
