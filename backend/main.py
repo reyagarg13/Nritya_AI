@@ -1,5 +1,15 @@
-import os
 import sys
+import traceback
+
+def handle_exception(exc_type, exc_value, exc_traceback):
+    if issubclass(exc_type, KeyboardInterrupt):
+        sys.__excepthook__(exc_type, exc_value, exc_traceback)
+        return
+    print("Uncaught exception:", ''.join(traceback.format_exception(exc_type, exc_value, exc_traceback)))
+
+sys.excepthook = handle_exception
+
+import os
 import json
 import argparse
 import tempfile
@@ -314,26 +324,26 @@ class ChoreographyGenerator:
                     {"name": "Leap", "duration": 2, "keyframes": self.generate_leap_keyframes()}
                 ]
             }
-    
+
     def generate_choreography(self, style: str, duration: int = 10, tempo: str = "medium", complexity: str = "intermediate") -> Dict[str, Any]:
         """Generate a choreography sequence"""
         if style not in self.pose_sequences:
             return {"error": f"Style '{style}' not supported"}
-        
+
         available_moves = self.pose_sequences[style]
-        
+
         # Adjust for tempo
-        tempo_multiplier = {"slow": 1.5, "medium": 1.0, "fast": 0.7}[tempo]
-        
+        tempo_multiplier = {"slow": 1.5, "medium": 1.0, "fast": 0.7}.get(tempo, 1.0)
+
         # Generate sequence
         sequence = []
         current_time = 0
-        
+
         while current_time < duration:
             # Select move based on complexity
             move = self.select_move_by_complexity(available_moves, complexity)
             adjusted_duration = move["duration"] * tempo_multiplier
-            
+
             if current_time + adjusted_duration <= duration:
                 sequence.append({
                     **move,
@@ -344,7 +354,7 @@ class ChoreographyGenerator:
                 current_time += adjusted_duration
             else:
                 break
-        
+
         return {
             "style": style,
             "duration": duration,
@@ -354,19 +364,22 @@ class ChoreographyGenerator:
             "total_moves": len(sequence),
             "generated_at": datetime.now().isoformat()
         }
-    
+
     def select_move_by_complexity(self, moves: List[Dict], complexity: str) -> Dict:
         """Select move based on complexity level"""
+        if not moves:
+            return {}
         if complexity == "beginner":
             # Prefer shorter, simpler moves
-            return min(moves, key=lambda x: x["duration"])
+            return min(moves, key=lambda x: x.get("duration", 2))
         elif complexity == "advanced":
             # Prefer longer, complex moves
-            return max(moves, key=lambda x: x["duration"])
+            return max(moves, key=lambda x: x.get("duration", 2))
         else:
             # Random selection for intermediate
-            return moves[np.random.randint(0, len(moves))]
-    
+            import random
+            return random.choice(moves)
+
     # Keyframe generation methods (simplified - in practice these would be more sophisticated)
     def generate_thumka_keyframes(self):
         return [
@@ -663,7 +676,7 @@ async def generate_choreography_endpoint(request: ChoreographyRequest):
 
 @app.post("/choreography/preview")
 async def preview_choreography_moves(
-    style: str = Body(..., description="Dance style"),
+    style: str = Body(..., embed=True, description="Dance style"),
 ):
     """
     Preview all moves and their keyframes for a given style from PhantomDance if available.
@@ -831,34 +844,54 @@ async def pose_feedback(request: PoseFeedbackRequest):
         "details": details
     }
 
+# Remove any existing cleanup/signal code and replace with this:
+@app.on_event("startup")
+async def startup_event():
+    logger.info("Initializing API resources...")
+    # Suppress TensorFlow Lite and absl warnings as early as possible
+    try:
+        import os
+        os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
+        import absl.logging
+        absl.logging.set_verbosity(absl.logging.ERROR)
+    except Exception:
+        pass
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    logger.info("Cleaning up API resources...")
+    try:
+        # Close MediaPipe resources
+        if hasattr(pose_analyzer, 'pose_static') and pose_analyzer.pose_static:
+            try:
+                pose_analyzer.pose_static.close()
+            except Exception:
+                pass
+        if hasattr(pose_analyzer, 'pose_video') and pose_analyzer.pose_video:
+            try:
+                pose_analyzer.pose_video.close()
+            except Exception:
+                pass
+        # Do not close logger handlers or flush sys.stdout/sys.stderr here
+        # Let Python's runtime handle it to avoid sys.excepthook/atexit errors
+    except Exception as e:
+        logger.error(f"Error during cleanup: {e}")
+
 def main():
     parser = argparse.ArgumentParser(description="Nritya AI API")
     parser.add_argument("--host", default="127.0.0.1", help="Host address")
     parser.add_argument("--port", type=int, default=8000, help="Port number")
     parser.add_argument("--reload", action="store_true", help="Enable auto-reload")
     parser.add_argument("--log-level", default="info", choices=["debug", "info", "warning", "error"])
-    
+
     args = parser.parse_args()
-    
-    # Configure logging level
     logging.getLogger().setLevel(getattr(logging, args.log_level.upper()))
-    
-    logger.info(f"Starting Nritya AI API on {args.host}:{args.port}")
-    
+
     try:
         import uvicorn
-        uvicorn.run(
-            "main:app",
-            host=args.host,
-            port=args.port,
-            reload=args.reload,
-            log_level=args.log_level
-        )
-    except ImportError:
-        logger.error("uvicorn is required. Install with: pip install uvicorn")
-        sys.exit(1)
+        uvicorn.run(app, host=args.host, port=args.port, reload=args.reload, log_level=args.log_level)
     except Exception as e:
-        logger.error(f"Failed to start server: {e}")
+        logger.error(f"Error starting server: {e}", exc_info=True)
         sys.exit(1)
 
 if __name__ == "__main__":

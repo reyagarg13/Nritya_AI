@@ -1408,50 +1408,38 @@
                 const moveSelect = document.getElementById('instructorMoveSelect');
                 moveSelect.innerHTML = `<option value="">-- Select move --</option>`;
                 if (!style) return;
-                let moves = [];
-                // Try PhantomDance preview first
                 try {
+                    // Fetch moves from /choreography/preview endpoint
                     const res = await fetch(`${BACKEND_URL}/choreography/preview`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ style })
                     });
                     const data = await res.json();
-                    if (data.moves && Array.isArray(data.moves) && data.moves.length > 0) {
-                        moves = data.moves.map(move => ({
-                            name: move.name,
-                            duration: move.duration
-                        }));
+                    // Support both array of moves and object with moves property
+                    let moves = [];
+                    if (Array.isArray(data)) {
+                        moves = data;
+                    } else if (Array.isArray(data.moves)) {
+                        moves = data.moves;
                     }
-                } catch {}
-                // If no moves found, fallback to built-in motions endpoint
-                if (moves.length === 0) {
-                    try {
-                        const res2 = await fetch(`${BACKEND_URL}/choreography/motions?style=${encodeURIComponent(style)}&enhanced=1`);
-                        const data2 = await res2.json();
-                        if (data2.motions && Array.isArray(data2.motions)) {
-                            moves = data2.motions.map(m => ({
-                                name: m.label,
-                                duration: undefined,
-                                desc: m.desc,
-                                icon: m.icon
-                            }));
+                    // Try to extract move names from different possible structures
+                    if (moves.length > 0) {
+                        for (const move of moves) {
+                            // Accept both {name: "..."} and string values
+                            let moveName = typeof move === "string" ? move : move.name || move.label || move.motion || "";
+                            if (!moveName) continue;
+                            const opt = document.createElement('option');
+                            opt.value = moveName;
+                            // Try to show duration if present
+                            let duration = move.duration || (move.meta && move.meta.duration) || "";
+                            opt.textContent = moveName + (duration ? ` (${duration}s)` : "");
+                            moveSelect.appendChild(opt);
                         }
-                    } catch {}
-                }
-                // Deduplicate by name
-                const seen = new Set();
-                for (const move of moves) {
-                    if (!move.name || seen.has(move.name)) continue;
-                    const opt = document.createElement('option');
-                    opt.value = move.name;
-                    opt.textContent = (move.icon ? move.icon + " " : "") + move.name +
-                        (move.duration ? ` (${move.duration}s)` : "") +
-                        (move.desc ? ` - ${move.desc}` : "");
-                    moveSelect.appendChild(opt);
-                    seen.add(move.name);
-                }
-                if (moveSelect.options.length === 1) {
+                    } else {
+                        moveSelect.innerHTML += `<option value="">No moves found</option>`;
+                    }
+                } catch (err) {
                     moveSelect.innerHTML += `<option value="">No moves found</option>`;
                 }
             }

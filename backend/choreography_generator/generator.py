@@ -1,3 +1,4 @@
+import sys
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -498,6 +499,25 @@ async def not_found_handler(request, exc):
         }
     )
 
+# Add after FastAPI app initialization
+def cleanup_generator():
+    """Cleanup generator resources"""
+    logger.info("Cleaning up generator resources...")
+    # Clear any caches
+    if hasattr(app.state, '_cache'):
+        app.state._cache.clear()
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Handle graceful shutdown"""
+    cleanup_generator()
+
+# Modify the main run block
 if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
+    try:
+        import uvicorn
+        uvicorn.run(app, host="0.0.0.0", port=8000)
+    except Exception as e:
+        logger.error(f"Generator error: {e}", exc_info=True)
+        cleanup_generator()
+        sys.exit(1)
