@@ -310,19 +310,96 @@
             margin-bottom: 10px;
         }
 
-        /* Responsive */
-        @media (max-width: 768px) {
-            .tracking-container, .choreo-container {
-                grid-template-columns: 1fr;
+        /* --- Virtual Dance Instructor Enhancements --- */
+        #instructorSidebarInfo {
+            margin-top: 22px;
+            background: rgba(30,30,60,0.95);
+            border-radius: 14px;
+            padding: 18px 16px;
+            color: #fff;
+            font-size: 1.08em;
+            box-shadow: 0 4px 24px 0 rgba(233,69,96,0.10);
+            transition: box-shadow 0.3s;
+        }
+        #instructorSidebarInfo .feedback-panel {
+            margin-top: 18px;
+            background: rgba(233,69,96,0.13);
+            border-radius: 10px;
+            padding: 14px 10px;
+            text-align: center;
+            font-size: 1.15em;
+            box-shadow: 0 2px 8px 0 rgba(242,113,33,0.08);
+        }
+        #instructorSidebarInfo .feedback-panel .emoji {
+            font-size: 2.2em;
+            vertical-align: middle;
+            margin-left: 8px;
+        }
+        #instructorSidebarInfo .feedback-panel .sim {
+            font-size: 1.25em;
+            font-weight: bold;
+            color: #f27121;
+        }
+        #instructorSidebarInfo .feedback-panel .timer {
+            font-size: 1.08em;
+            color: #e94560;
+            margin-left: 10px;
+        }
+        #instructorSidebarInfo .move-meta {
+            margin-bottom: 8px;
+            font-size: 1.08em;
+            color: #f27121;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+        #instructorSidebarInfo .move-meta .move-style {
+            color: #fff;
+            font-weight: normal;
+            font-size: 0.98em;
+            margin-left: 8px;
+        }
+        #instructorSidebarInfo button {
+            width: 100%;
+            margin-top: 10px;
+            font-size: 1.08em;
+            padding: 12px 0;
+        }
+        @media (max-width: 900px) {
+            #instructor .container > div {
+                flex-direction: column !important;
             }
-            
-            .hero h1 {
-                font-size: 2.5rem;
+            #instructorSidebarInfo {
+                margin-bottom: 24px;
             }
-            
-            .nav-links {
-                gap: 15px;
+        }
+        @media (max-width: 600px) {
+            #instructorSidebarInfo, .choreo-controls {
+                padding: 10px 4vw !important;
             }
+            #instructorSidebarInfo .feedback-panel {
+                padding: 10px 2vw;
+            }
+        }
+
+        /* Animate move name */
+        @keyframes fadeInMove {
+            from { opacity: 0; transform: translateY(-10px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+        #moveNameDisplay {
+            animation: fadeInMove 0.7s;
+            color: #f27121;
+            font-size: 2.1em;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+        #moveStyleDisplay {
+            color: #e94560;
+            font-size: 1.08em;
+            text-align: center;
+            margin-bottom: 16px;
         }
     </style>
 </head>
@@ -545,13 +622,13 @@
                         </ul>
                         <div style="margin-top:18px;">
                             <label for="instructorStyleSelect" style="color:#f27121;">Dance Style:</label>
-                            <select id="instructorStyleSelect" style="width:100%;padding:8px;border-radius:8px;margin-top:8px;">
+                            <select id="instructorStyleSelect" aria-label="Dance Style" style="width:100%;padding:8px;border-radius:8px;margin-top:8px;">
                                 <option value="">-- Select style --</option>
                             </select>
                         </div>
                         <div style="margin-top:18px;">
                             <label for="instructorMoveSelect" style="color:#f27121;">Move:</label>
-                            <select id="instructorMoveSelect" style="width:100%;padding:8px;border-radius:8px;margin-top:8px;">
+                            <select id="instructorMoveSelect" aria-label="Move" style="width:100%;padding:8px;border-radius:8px;margin-top:8px;">
                                 <option value="">-- Select move --</option>
                             </select>
                             <button class="btn" id="previewInstructorMoveBtn" style="margin-top:10px;">Preview Move</button>
@@ -561,11 +638,25 @@
                             <button class="btn" id="instructorStartBtn">Start Instructor</button>
                             <button class="btn secondary" id="instructorStopBtn">Stop</button>
                         </div>
-                        <div id="instructorStatus" style="margin-top:14px; color:#f27121;"></div>
+                        <div id="instructorStatus" style="margin-top:14px; color:#f27121;" aria-live="polite"></div>
+                        <!-- Sidebar Info Card -->
+                        <div id="instructorSidebarInfo">
+                            <div class="move-meta">
+                                <span id="sidebarMoveMeta"></span>
+                            </div>
+                            <div class="feedback-panel">
+                                <span class="sim" id="sidebarSimilarity">0%</span>
+                                <span class="emoji" id="sidebarEmoji">🤔</span>
+                                <span class="timer" id="sidebarTimer">00:00</span>
+                            </div>
+                            <button class="btn secondary" id="restartInstructorBtn" style="margin-top:10px;">Restart Instructor</button>
+                        </div>
                     </div>
                 </div>
                 <div style="flex:2 1 500px; min-width:320px;">
                     <div style="position:relative; background:rgba(30,30,60,0.7); border-radius:18px; padding:18px;">
+                        <div id="moveNameDisplay"></div>
+                        <div id="moveStyleDisplay"></div>
                         <canvas id="instructorReferenceCanvas" style="width:100%; border-radius:12px; background:#181818; margin-bottom:10px;"></canvas>
                         <video id="instructorVideo" style="width:100%; border-radius:12px; display:none;" controls></video>
                         <canvas id="instructorWebcam" style="width:100%; border-radius:12px; display:none;"></canvas>
@@ -594,61 +685,6 @@
             <div id="aboutTeam" style="margin-bottom:32px;"></div>
             <div id="aboutPhantomDance" style="margin-bottom:32px;"></div>
             <div id="aboutContact" style="margin-bottom:32px;"></div>
-        </div>
-    </div>
-
-    <!-- Virtual Dance Instructor Page -->
-    <div class="page" id="instructor">
-        <div class="container">
-            <h2 style="color:#f27121; text-align:center; margin-bottom:30px;">Virtual Dance Instructor</h2>
-            <div style="display:flex; flex-wrap:wrap; gap:32px;">
-                <div style="flex:1 1 350px; min-width:320px;">
-                    <div style="background:rgba(30,30,60,0.7); border-radius:18px; padding:24px;">
-                        <h3 style="color:#f27121; margin-bottom:12px;">How it works</h3>
-                        <ul style="font-size:1.05rem; line-height:1.7; color:#fff;">
-                            <li>Select a dance style and move from PhantomDance library.</li>
-                            <li>Preview the reference animation and keyframes.</li>
-                            <li>Start your webcam and follow the instructor's moves.</li>
-                            <li>Get real-time feedback on correctness, timing, and fluidity.</li>
-                        </ul>
-                        <div style="margin-top:18px;">
-                            <label for="instructorStyleSelect" style="color:#f27121;">Dance Style:</label>
-                            <select id="instructorStyleSelect" style="width:100%;padding:8px;border-radius:8px;margin-top:8px;">
-                                <option value="">-- Select style --</option>
-                            </select>
-                        </div>
-                        <div style="margin-top:18px;">
-                            <label for="instructorMoveSelect" style="color:#f27121;">Move:</label>
-                            <select id="instructorMoveSelect" style="width:100%;padding:8px;border-radius:8px;margin-top:8px;">
-                                <option value="">-- Select move --</option>
-                            </select>
-                            <button class="btn" id="previewInstructorMoveBtn" style="margin-top:10px;">Preview Move</button>
-                            <button class="btn" id="loadInstructorMoveBtn" style="margin-top:10px;">Load Move</button>
-                        </div>
-                        <div style="margin-top:18px;">
-                            <button class="btn" id="instructorStartBtn">Start Instructor</button>
-                            <button class="btn secondary" id="instructorStopBtn">Stop</button>
-                        </div>
-                        <div id="instructorStatus" style="margin-top:14px; color:#f27121;"></div>
-                    </div>
-                </div>
-                <div style="flex:2 1 500px; min-width:320px;">
-                    <div style="position:relative; background:rgba(30,30,60,0.7); border-radius:18px; padding:18px;">
-                        <canvas id="instructorReferenceCanvas" style="width:100%; border-radius:12px; background:#181818; margin-bottom:10px;"></canvas>
-                        <video id="instructorVideo" style="width:100%; border-radius:12px; display:none;" controls></video>
-                        <canvas id="instructorWebcam" style="width:100%; border-radius:12px; display:none;"></canvas>
-                        <canvas id="instructorPoseCanvas" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none;"></canvas>
-                        <div id="instructorFeedback" style="margin-top:12px; color:#f27121; text-align:center;"></div>
-                        <div id="instructorPreviewModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:2000; align-items:center; justify-content:center;">
-                            <div style="background:#222; border-radius:15px; padding:30px; max-width:600px; max-height:80vh; overflow:auto; color:white; position:relative;">
-                                <button id="closeInstructorPreviewBtn" style="position:absolute; top:10px; right:15px; background:none; border:none; color:#e94560; font-size:1.5rem; cursor:pointer;">&times;</button>
-                                <h3 style="color:#f27121; margin-bottom:15px;">Move Preview & Keyframes</h3>
-                                <div id="instructorPreviewContent"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -1351,6 +1387,25 @@
 
         // --- Enhanced Virtual Dance Instructor ---
         class VirtualDanceInstructor {
+            restart() {
+                this.stop();
+                // Reset feedback, similarity, and UI
+                this.similarityHistory = [];
+                this.feedbackDetails = null;
+                this.renderFeedbackChart();
+                this.renderDetailedFeedback();
+                document.getElementById('instructorStatus').textContent = 'Restarting instructor...';
+                // Only restart if a move is loaded
+                if (Array.isArray(this.expectedLandmarks) && this.expectedLandmarks.length > 0) {
+                    setTimeout(() => this.start(), 400);
+                } else {
+                    document.getElementById('instructorStatus').textContent = 'Load a move first.';
+                }
+            }
+            // Add missing method to prevent errors
+            updateSidebarInfo() {
+                // You can implement sidebar updates here if needed
+            }
             constructor() {
                 this.reference = null;
                 this.isRunning = false;
@@ -1368,13 +1423,17 @@
 
             async init() {
                 await this.populateStyleSelect();
-                document.getElementById('instructorStyleSelect').onchange = () => this.populateEnhancedMotionDropdown();
+                document.getElementById('instructorStyleSelect').onchange = () => {
+                    this.populateEnhancedMotionDropdown();
+                    this.clearStatus();
+                };
                 document.getElementById('instructorMoveSelect').onchange = () => this.clearStatus();
                 document.getElementById('previewInstructorMoveBtn').onclick = () => this.previewMove();
                 document.getElementById('closeInstructorPreviewBtn').onclick = () => this.closePreview();
                 document.getElementById('loadInstructorMoveBtn').onclick = () => this.loadSelectedMove();
                 document.getElementById('instructorStartBtn').onclick = () => this.start();
                 document.getElementById('instructorStopBtn').onclick = () => this.stop();
+                document.getElementById('restartInstructorBtn').onclick = () => this.restart();
                 document.getElementById('instructorStatus').textContent = '';
                 document.getElementById('instructorFeedback').textContent = '';
                 document.getElementById('instructorVideo').style.display = 'none';
@@ -1386,6 +1445,9 @@
                 this.feedbackDetails = null;
                 this.renderFeedbackChart();
                 this.renderDetailedFeedback();
+                this.updateSidebarInfo();
+                document.getElementById('moveNameDisplay').textContent = '';
+                document.getElementById('moveStyleDisplay').textContent = '';
             }
 
             async populateStyleSelect() {
@@ -1415,6 +1477,7 @@
                 const style = document.getElementById('instructorStyleSelect').value;
                 const moveSelect = document.getElementById('instructorMoveSelect');
                 moveSelect.innerHTML = `<option value="">-- Select move --</option>`;
+                this.moveMap = {};
                 if (!style) return;
                 try {
                     const res = await fetch(`${BACKEND_URL}/choreography/preview`, {
@@ -1422,6 +1485,7 @@
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ style })
                     });
+                    if (!res.ok) throw new Error("Failed to fetch moves: " + res.status);
                     const data = await res.json();
                     let moves = [];
                     if (Array.isArray(data)) {
@@ -1431,12 +1495,12 @@
                     }
                     if (moves.length > 0) {
                         for (const move of moves) {
-                            let moveName = typeof move === "string" ? move : move.name || move.label || move.motion || "";
-                            if (!moveName) continue;
+                            if (!move || !move.name) continue;
+                            this.moveMap[move.name] = move;
                             const opt = document.createElement('option');
-                            opt.value = moveName;
+                            opt.value = move.name;
                             let duration = move.duration || (move.meta && move.meta.duration) || "";
-                            opt.textContent = moveName + (duration ? ` (${duration}s)` : "");
+                            opt.textContent = move.name + (duration ? ` (${duration}s)` : "");
                             moveSelect.appendChild(opt);
                         }
                     } else {
@@ -1444,6 +1508,7 @@
                     }
                 } catch (err) {
                     moveSelect.innerHTML += `<option value="">No moves found</option>`;
+                    console.error("Error loading moves:", err);
                 }
             }
 
@@ -1452,6 +1517,7 @@
                 document.getElementById('instructorFeedback').textContent = '';
                 this.similarityHistory = [];
                 this.renderFeedbackChart();
+                this.updateSidebarInfo();
             }
 
             async previewMove() {
@@ -1463,6 +1529,7 @@
                 }
                 try {
                     const res = await fetch(`${BACKEND_URL}/choreography/move?style=${encodeURIComponent(style)}&name=${encodeURIComponent(moveName)}`);
+                    if (!res.ok) throw new Error("Move preview fetch failed: " + res.status);
                     const move = await res.json();
                     if (move.keyframes && move.keyframes.length > 0) {
                         const previewModal = document.getElementById('instructorPreviewModal');
@@ -1479,8 +1546,9 @@
                     } else {
                         document.getElementById('instructorStatus').textContent = 'No keyframes for this move.';
                     }
-                } catch {
+                } catch (err) {
                     document.getElementById('instructorStatus').textContent = 'Could not load move preview.';
+                    console.error("Error loading move preview:", err);
                 }
             }
 
@@ -1496,32 +1564,69 @@
                     this.expectedLandmarks = null;
                     return;
                 }
+                // Use the move object from the map if available
+                const moveObj = this.moveMap && this.moveMap[moveName] ? this.moveMap[moveName] : null;
                 try {
-                    const res = await fetch(`${BACKEND_URL}/choreography/move?style=${encodeURIComponent(style)}&name=${encodeURIComponent(moveName)}`);
-                    if (!res.ok) {
-                        const err = await res.json().catch(() => ({}));
-                        document.getElementById('instructorStatus').textContent = err.detail ? `Error: ${err.detail}` : 'Could not load move.';
+                    let move = null;
+                    if (moveObj) {
+                        move = moveObj;
+                    } else {
+                        // Try POST first (for some backends), fallback to GET if fails
+                        let res = await fetch(`${BACKEND_URL}/choreography/move`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ style, name: moveName })
+                        });
+                        if (res.ok) {
+                            move = await res.json();
+                        } else {
+                            // fallback to GET
+                            res = await fetch(`${BACKEND_URL}/choreography/move?style=${encodeURIComponent(style)}&name=${encodeURIComponent(moveName)}`);
+                            if (!res.ok) throw new Error("Move GET fallback failed: " + res.status);
+                            move = await res.json();
+                        }
+                    }
+                    console.debug("[Instructor] Loaded move object:", move);
+                    if (!move) {
+                        document.getElementById('instructorStatus').textContent = 'Move object not found.';
                         this.expectedLandmarks = null;
                         return;
                     }
-                    const move = await res.json();
                     if (move.landmarks && Array.isArray(move.landmarks) && move.landmarks.length > 0) {
                         this.reference = { type: 'pose', landmarks: move.landmarks, name: move.name, style: move.style };
                         this.expectedLandmarks = move.landmarks;
                         document.getElementById('instructorStatus').textContent = `Loaded: ${move.name}`;
                         this.showReferenceAnimation(move);
+                        this.updateSidebarInfo();
+                        // Animate move name if element exists
+                        const moveNameDiv = document.getElementById('moveNameDisplay');
+                        if (moveNameDiv) {
+                            moveNameDiv.style.opacity = 0;
+                            setTimeout(() => { moveNameDiv.style.opacity = 1; }, 100);
+                        }
                     } else if (move.keyframes && Array.isArray(move.keyframes) && move.keyframes.length > 0) {
                         this.reference = { type: 'keyframes', keyframes: move.keyframes, name: move.name, style: move.style };
+                        // For keyframe-only moves, set expectedLandmarks to dummy zeros (so instructor can still start)
                         this.expectedLandmarks = Array.from({length: 33}, () => ({x: 0, y: 0, z: 0, visibility: 0}));
                         document.getElementById('instructorStatus').textContent = `Loaded: ${move.name} (keyframes only)`;
                         this.showReferenceAnimation(move);
+                        this.updateSidebarInfo();
+                        const moveNameDiv = document.getElementById('moveNameDisplay');
+                        if (moveNameDiv) {
+                            moveNameDiv.style.opacity = 0;
+                            setTimeout(() => { moveNameDiv.style.opacity = 1; }, 100);
+                        }
                     } else {
+                        // Accept moves with either landmarks or keyframes, but if neither, show error
                         document.getElementById('instructorStatus').textContent = 'Selected move has no reference pose or keyframes.';
                         this.expectedLandmarks = null;
+                        console.error("Move object missing landmarks and keyframes:", move);
                     }
                 } catch (err) {
-                    document.getElementById('instructorStatus').textContent = 'Could not load move.';
+                    // Show actual error message for easier debugging
+                    document.getElementById('instructorStatus').textContent = 'Could not load move: ' + (err && err.message ? err.message : err);
                     this.expectedLandmarks = null;
+                    console.error("Error loading move:", err, moveObj);
                 }
             }
 
@@ -1579,13 +1684,16 @@
             }
 
             async start() {
-                if (this.isRunning) return;
+                if (this.isRunning) {
+                    document.getElementById('instructorStatus').textContent = 'Instructor is already running.';
+                    return;
+                }
                 if (!Array.isArray(this.expectedLandmarks) || this.expectedLandmarks.length === 0) {
                     document.getElementById('instructorStatus').textContent = 'Load a move first.';
                     return;
                 }
                 this.isRunning = true;
-                document.getElementById('instructorStatus').textContent = 'Instructor started. Please allow webcam access.';
+                document.getElementById('instructorStatus').textContent = 'Starting instructor...';
                 await this.startWebcam();
             }
 
@@ -1593,23 +1701,35 @@
                 const video = document.getElementById('instructorVideo');
                 const webcamCanvas = document.getElementById('instructorWebcam');
                 const poseCanvas = document.getElementById('instructorPoseCanvas');
-                video.style.display = 'none';
+                // Always show video and canvas when running
+                video.style.display = '';
                 webcamCanvas.style.display = '';
                 poseCanvas.style.display = '';
                 try {
                     const stream = await navigator.mediaDevices.getUserMedia({ video: true });
                     video.srcObject = stream;
-                    video.play();
+                    await video.play();
+                    // Set canvas sizes after video metadata is loaded
+                    if (video.videoWidth === 0 || video.videoHeight === 0) {
+                        await new Promise(resolve => {
+                            video.onloadedmetadata = resolve;
+                        });
+                    }
                     webcamCanvas.width = video.videoWidth || 640;
                     webcamCanvas.height = video.videoHeight || 480;
                     poseCanvas.width = webcamCanvas.width;
                     poseCanvas.height = webcamCanvas.height;
                     this.similarityHistory = [];
                     this.feedbackDetails = null;
+                    document.getElementById('instructorStatus').textContent = 'Instructor running. Webcam is active.';
                     this.runPoseDetection(video, webcamCanvas, poseCanvas);
                 } catch (e) {
-                    document.getElementById('instructorStatus').textContent = 'Webcam access denied.';
+                    document.getElementById('instructorStatus').textContent = 'Webcam access denied or not available.';
+                    video.style.display = 'none';
+                    webcamCanvas.style.display = 'none';
+                    poseCanvas.style.display = 'none';
                     this.isRunning = false;
+                    console.error('Webcam error:', e);
                 }
             }
 
@@ -1633,17 +1753,96 @@
                     ctx.clearRect(0, 0, webcamCanvas.width, webcamCanvas.height);
                     ctx.drawImage(video, 0, 0, webcamCanvas.width, webcamCanvas.height);
                     if (results.poseLandmarks) {
-                        window.drawLandmarks(ctx, results.poseLandmarks, "#f27121");
-                        // Compare with expectedLandmarks
-                        const liveLandmarks = results.poseLandmarks.map(lm => ({
+                        // Extract keypoints and confidence scores
+                        const keypoints = results.poseLandmarks.map((lm, idx) => ({
+                            index: idx,
                             x: lm.x,
                             y: lm.y,
                             z: lm.z || 0,
-                            visibility: lm.visibility
+                            confidence: lm.visibility
                         }));
+                        // Compare with expectedLandmarks (fallback to zeros if missing)
+                        let expected = this.expectedLandmarks;
+                        if (!Array.isArray(expected) || expected.length !== keypoints.length) {
+                            expected = Array.from({length: keypoints.length}, () => ({x: 0, y: 0, z: 0, visibility: 0}));
+                        }
+                        const liveLandmarks = keypoints.map(lm => ({
+                            x: lm.x,
+                            y: lm.y,
+                            z: lm.z,
+                            visibility: lm.confidence
+                        }));
+                        // Per-joint similarity (Euclidean distance)
+                        let jointScores = [];
+                        for (let i = 0; i < liveLandmarks.length; ++i) {
+                            const l = liveLandmarks[i];
+                            const e = expected[i];
+                            if (l.visibility > 0.5 && e.visibility > 0.5) {
+                                const dx = l.x - e.x;
+                                const dy = l.y - e.y;
+                                const dist = Math.sqrt(dx*dx + dy*dy);
+                                // Assume max reasonable distance is 0.5 (normalized)
+                                const sim = Math.max(0, 1 - dist / 0.5);
+                                jointScores[i] = sim;
+                            } else {
+                                jointScores[i] = null;
+                            }
+                        }
+                        // Color-coded skeleton overlay
+                        const connections = [
+                            [11, 13], [13, 15], [12, 14], [14, 16], // arms
+                            [11, 12], // shoulders
+                            [23, 24], // hips
+                            [11, 23], [12, 24], // torso
+                            [23, 25], [25, 27], [24, 26], [26, 28], // legs
+                            [27, 31], [28, 32], // feet
+                        ];
+                        // Scale normalized landmarks to canvas
+                        const pts = keypoints.map(lm => ({
+                            x: lm.x * webcamCanvas.width,
+                            y: lm.y * webcamCanvas.height,
+                            confidence: lm.confidence
+                        }));
+                        for (const [a, b] of connections) {
+                            if (pts[a] && pts[b]) {
+                                // Color by minimum similarity of the two joints
+                                let color = '#888';
+                                if (jointScores[a] != null && jointScores[b] != null) {
+                                    const minSim = Math.min(jointScores[a], jointScores[b]);
+                                    if (minSim > 0.85) color = '#4caf50'; // green
+                                    else if (minSim > 0.65) color = '#ffc107'; // yellow
+                                    else color = '#e94560'; // red
+                                }
+                                ctx.save();
+                                ctx.strokeStyle = color;
+                                ctx.lineWidth = 5;
+                                ctx.beginPath();
+                                ctx.moveTo(pts[a].x, pts[a].y);
+                                ctx.lineTo(pts[b].x, pts[b].y);
+                                ctx.stroke();
+                                ctx.restore();
+                            }
+                        }
+                        // Draw joints as circles, color-coded
+                        for (let i = 0; i < pts.length; ++i) {
+                            let color = '#888';
+                            if (jointScores[i] != null) {
+                                if (jointScores[i] > 0.85) color = '#4caf50';
+                                else if (jointScores[i] > 0.65) color = '#ffc107';
+                                else color = '#e94560';
+                            }
+                            ctx.save();
+                            ctx.fillStyle = color;
+                            ctx.beginPath();
+                            ctx.arc(pts[i].x, pts[i].y, 7, 0, 2 * Math.PI);
+                            ctx.fill();
+                            ctx.restore();
+                        }
+
+                        // Overall similarity for feedback
                         const sim = window.compareLandmarks(
                             liveLandmarks,
-                            this.expectedLandmarks
+                            expected
                         );
                         this.lastSimilarity = sim;
                         this.similarityHistory.push(sim);
@@ -1653,7 +1852,7 @@
                         // Enhanced: Call backend for detailed feedback every 1s
                         if (!this.feedbackTimer) {
                             this.feedbackTimer = setInterval(() => {
-                                this.sendDetailedFeedback(liveLandmarks, this.expectedLandmarks);
+                                this.sendDetailedFeedback(liveLandmarks, expected);
                             }, 1000);
                         }
 
@@ -1661,8 +1860,32 @@
                         if (sim > 0.85) msg = 'Great! Your pose matches the instructor!';
                         else if (sim > 0.65) msg = 'Good! Try to match the pose more closely.';
                         else msg = 'Keep practicing to match the instructor pose!';
+
+                        // Show keypoints and confidence scores in feedback area
+                        let kpTable = `<div style=\"margin-top:8px;font-size:0.95em;max-height:120px;overflow:auto;background:#181818;padding:6px 8px;border-radius:7px;\">
+                            <b style='color:#f27121;'>Keypoints & Confidence</b><br>
+                            <table style='width:100%;font-size:0.93em;color:#fff;'><tr><th>#</th><th>X</th><th>Y</th><th>Conf</th><th>Match</th></tr>`;
+                        for (const kp of keypoints) {
+                            let match = '';
+                            if (jointScores[kp.index] != null) {
+                                if (jointScores[kp.index] > 0.85) match = '<span style=\"color:#4caf50;\">✔</span>';
+                                else if (jointScores[kp.index] > 0.65) match = '<span style=\"color:#ffc107;\">~</span>';
+                                else match = '<span style=\"color:#e94560;\">✗</span>';
+                            }
+                            kpTable += `<tr><td>${kp.index}</td><td>${kp.x.toFixed(3)}</td><td>${kp.y.toFixed(3)}</td><td>${(kp.confidence*100).toFixed(1)}%</td><td>${match}</td></tr>`;
+                        }
+                        kpTable += `</table></div>`;
+
                         document.getElementById('instructorFeedback').innerHTML =
-                            `<b>Similarity:</b> ${(sim*100).toFixed(1)}%<br>${msg}`;
+                            `<b>Similarity:</b> ${(sim*100).toFixed(1)}%<br>${msg}` + kpTable;
+                    } else {
+                        // No poseLandmarks detected
+                        ctx.save();
+                        ctx.fillStyle = '#e94560';
+                        ctx.font = '22px Arial';
+                        ctx.textAlign = 'center';
+                        ctx.fillText('No pose detected', webcamCanvas.width/2, webcamCanvas.height/2);
+                        ctx.restore();
                     }
                 });
                 const camera = new window.Camera(video, {
@@ -1784,6 +2007,9 @@
                 this.feedbackDetails = null;
                 this.renderFeedbackChart();
                 this.renderDetailedFeedback();
+                this.updateSidebarInfo(0);
+                document.getElementById('moveNameDisplay').textContent = '';
+                document.getElementById('moveStyleDisplay').textContent = '';
             }
         }
 

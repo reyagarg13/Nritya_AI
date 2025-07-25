@@ -1,3 +1,8 @@
+from fastapi import status
+# --- Add POST endpoint for /choreography/move to support frontend POST requests ---
+from fastapi import status
+# --- Add POST endpoint for /choreography/move to support frontend POST requests ---
+from fastapi import Form
 import sys
 import traceback
 
@@ -53,6 +58,12 @@ mp_pose = mp.solutions.pose
 mp_drawing_styles = mp.solutions.drawing_styles
 
 # Pydantic models for request/response
+class PoseRequest(BaseModel):
+    image_data: str  # Base64 encoded image
+from fastapi import status
+from fastapi import Form
+    # timestamp: Optional[str] = None
+
 class PoseRequest(BaseModel):
     image_data: str  # Base64 encoded image
     timestamp: Optional[str] = None
@@ -680,7 +691,9 @@ async def preview_choreography_moves(
 ):
     """
     Preview all moves and their keyframes for a given style from PhantomDance if available.
+    Returns a list of full move objects (not just names).
     """
+    logger.info(f"/choreography/preview called for style: {style}")
     if PHANTOMDANCE and "styles" in PHANTOMDANCE and style in PHANTOMDANCE["styles"]:
         moves = PHANTOMDANCE["styles"][style]
         return {"style": style, "moves": moves, "total_moves": len(moves), "source": "phantomdance"}
@@ -772,63 +785,54 @@ async def about_info():
         ],
         "mission": (
             "To democratize dance education and creativity using AI. "
-            "To support solo practice, group choreography, and teaching with real-time feedback and intelligent tools."
-        ),
-        "version": "1.0.0"
+            "We blend tradition with technology to make learning, practicing, and choreographing dance accessible to all."
+        )
     }
 
-@app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket):
-    """WebSocket endpoint for real-time pose tracking."""
-    await manager.connect(websocket)
+@app.get("/choreography/move")
+async def get_move(style: str, name: str):
+    """
+    Get full move data for a given style and move name from PhantomDance.
+    """
+    if PHANTOMDANCE and "styles" in PHANTOMDANCE and style in PHANTOMDANCE["styles"]:
+        moves = PHANTOMDANCE["styles"][style]
+        for move in moves:
+            if move.get("name", "") == name:
+                return move
+    # fallback: use built-in moves
+    moves = choreography_generator.pose_sequences.get(style, [])
+    for move in moves:
+        if move.get("name", "") == name:
+            return move
+    raise HTTPException(status_code=404, detail="Move not found")
+
+# --- POST endpoint for /choreography/move ---
+@app.post("/choreography/move")
+async def post_move(request: Request):
+    """
+    POST endpoint to get move details for a given style and move name.
+    Accepts JSON body: {"style": ..., "name": ...}
+    """
     try:
-        while True:
-            # Receive image data from client
-            data = await websocket.receive_text()
-            message = json.loads(data)
-            
-            if message.get("type") == "frame":
-                # Analyze pose
-                result = pose_analyzer.analyze_image(message["image_data"])
-                
-                # Send result back to client
-                response = {
-                    "type": "pose_result",
-                    "data": result,
-                    "frame_count": pose_analyzer.frame_count
-                }
-                
-                await manager.send_personal_message(response, websocket)
-                pose_analyzer.frame_count += 1
-                
-            elif message.get("type") == "start_tracking":
-                pose_analyzer.frame_count = 0
-                pose_analyzer.pose_history = []
-                await manager.send_personal_message({"type": "tracking_started"}, websocket)
-                
-            elif message.get("type") == "stop_tracking":
-                # Save session data
-                session_data = {
-                    "total_frames": pose_analyzer.frame_count,
-                    "poses_detected": len(pose_analyzer.pose_history),
-                    "session_duration": message.get("duration", 0),
-                    "timestamp": datetime.now().isoformat()
-                }
-                
-                output_path = OUTPUT_DIR / f"session_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-                with open(output_path, 'w') as f:
-                    json.dump(session_data, f, indent=2)
-                
-                await manager.send_personal_message({
-                    "type": "tracking_stopped",
-                    "session_data": session_data
-                }, websocket)
-                
-    except WebSocketDisconnect:
-        manager.disconnect(websocket)
+        data = await request.json()
+        style = data.get("style")
+        name = data.get("name")
+        if not style or not name:
+            raise HTTPException(status_code=400, detail="Missing style or name in request body")
+        # Reuse logic from GET endpoint
+        if PHANTOMDANCE and "styles" in PHANTOMDANCE and style in PHANTOMDANCE["styles"]:
+            moves = PHANTOMDANCE["styles"][style]
+            for move in moves:
+                if move.get("name", "") == name:
+                    return move
+        moves = choreography_generator.pose_sequences.get(style, [])
+        for move in moves:
+            if move.get("name", "") == name:
+                return move
+        raise HTTPException(status_code=404, detail="Move not found")
     except Exception as e:
-        logger.error(f"WebSocket error: {e}")
-        manager.disconnect(websocket)
+        logger.error(f"Error in POST /choreography/move: {e}")
+    raise HTTPException(status_code=500, detail=f"Failed to get move: {str(e)}")
 
 @app.post("/feedback")
 async def pose_feedback(request: PoseFeedbackRequest):
