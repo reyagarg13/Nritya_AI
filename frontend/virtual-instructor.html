@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual Dance Instructor - Nritya AI</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .instructor-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .instructor-header {
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+
+        .instructor-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #f093fb 0%, #f5576c 100%);
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            animation: avatarPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes avatarPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .instructor-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .instructor-panel {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .lesson-selector {
+            margin-bottom: 20px;
+        }
+
+        .lesson-card {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 10px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .lesson-card:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .lesson-card.active {
+            border-color: #f5576c;
+            background: linear-gradient(135deg, rgba(245, 87, 108, 0.2) 0%, rgba(240, 147, 251, 0.2) 100%);
+        }
+
+        .difficulty-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .difficulty-beginner { background: #4CAF50; color: white; }
+        .difficulty-intermediate { background: #FF9800; color: white; }
+        .difficulty-advanced { background: #F44336; color: white; }
+
+        .video-area {
+            background: #000;
+            border-radius: 15px;
+            min-height: 400px;
+            height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .camera-feed {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 15px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        .pose-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .instructor-tips {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            max-width: 300px;
+            animation: tipSlideIn 0.5s ease-out;
+            z-index: 3;
+        }
+
+        @keyframes tipSlideIn {
+            0% { transform: translateX(100%); opacity: 0; }
+            100% { transform: translateX(0); opacity: 1; }
+        }
+
+        .progress-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .controls-section {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .control-btn:active {
+            transform: translateY(0);
+        }
+
+        .control-btn.danger {
+            background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
+        }
+
+        .control-btn.success {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+        }
+
+        .feedback-panel {
+            background: linear-gradient(135deg, rgba(245, 87, 108, 0.1) 0%, rgba(240, 147, 251, 0.1) 100%);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 4px solid #f5576c;
+        }
+
+        .feedback-score {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .feedback-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .feedback-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .ai-suggestions {
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .suggestion-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 12px;
+            border-radius: 8px;
+            margin: 8px 0;
+            border-left: 3px solid #667eea;
+        }
+
+        .achievement-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            z-index: 1000;
+            animation: achievementPop 0.5s ease-out;
+            display: none;
+        }
+
+        @keyframes achievementPop {
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+
+        .voice-commands {
+            background: rgba(118, 75, 162, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .voice-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #764ba2;
+            font-weight: bold;
+        }
+
+        .voice-indicator.listening {
+            color: #f5576c;
+            animation: voicePulse 1s ease-in-out infinite;
+        }
+
+        @keyframes voicePulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .instructor-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .instructor-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls-section {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .control-btn {
+                width: 200px;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="index.html" onclick="window.router?.navigateTo('choreography');return false;">Choreography</a>
+        <a href="index.html" onclick="window.router?.navigateTo('tracking');return false;">Live Tracking</a>
+        <a href="about.html">About</a>
+        <a href="virtual-instructor.html" class="active">Virtual Instructor</a>
+    </nav>
+
+    <div class="instructor-container">
+        <!-- Header Section -->
+        <div class="instructor-header">
+            <div class="instructor-avatar">🤖</div>
+            <h1>Virtual Dance Instructor</h1>
+            <p>AI-Powered Personal Dance Teacher</p>
+            <div class="voice-commands">
+                <div class="voice-indicator" id="voiceIndicator">
+                    🎤 Say "Hey Instructor" to activate voice commands
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="instructor-grid">
+            <!-- Left Panel - Lesson Selection -->
+            <div class="instructor-panel">
+                <h3>📚 Choose Your Lesson</h3>
+                <div class="lesson-selector">
+                    <div class="lesson-card active" data-lesson="bollywood-basics">
+                        <h4>Bollywood Basics</h4>
+                        <p>Learn fundamental Bollywood moves</p>
+                        <span class="difficulty-badge difficulty-beginner">Beginner</span>
+                    </div>
+                    <div class="lesson-card" data-lesson="kathak-pirouettes">
+                        <h4>Kathak Pirouettes</h4>
+                        <p>Master the art of classical spins</p>
+                        <span class="difficulty-badge difficulty-intermediate">Intermediate</span>
+                    </div>
+                    <div class="lesson-card" data-lesson="hiphop-freestyle">
+                        <h4>Hip-Hop Freestyle</h4>
+                        <p>Express yourself with urban moves</p>
+                        <span class="difficulty-badge difficulty-intermediate">Intermediate</span>
+                    </div>
+                    <div class="lesson-card" data-lesson="contemporary-flow">
+                        <h4>Contemporary Flow</h4>
+                        <p>Fluid and expressive movements</p>
+                        <span class="difficulty-badge difficulty-advanced">Advanced</span>
+                    </div>
+                </div>
+
+                <!-- Lesson Actions -->
+                <div class="lesson-actions" style="margin: 20px 0; display: flex; gap: 10px;">
+                    <button class="control-btn" onclick="previewLesson()" style="flex: 1;">
+                        👁️ Preview
+                    </button>
+                    <button class="control-btn" onclick="loadMove()" style="flex: 1;">
+                        📥 Load Move
+                    </button>
+                </div>
+
+                <!-- Instructor Stats -->
+                <div class="instructor-stats">
+                    <div class="stat-card">
+                        <div class="stat-value" id="sessionCount">12</div>
+                        <div class="stat-label">Sessions</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="avgScore">87</div>
+                        <div class="stat-label">Avg Score</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalTime">5.2</div>
+                        <div class="stat-label">Hours</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel - Video Area -->
+            <div class="instructor-panel">
+                <div class="video-area" id="videoArea">
+                    <video id="cameraFeed" class="camera-feed" autoplay muted playsinline style="display: none;"></video>
+                    <canvas id="poseOverlay" class="pose-overlay"></canvas>
+                    <div class="instructor-tips" id="instructorTips" style="display: none;">
+                        <h4>💡 Instructor Tip</h4>
+                        <p id="tipText">Ready to start your lesson!</p>
+                    </div>
+                    <div id="placeholderText" style="color: #667eea; font-size: 1.2rem;">
+                        🎥 Click "Start Lesson" to begin
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controls Section -->
+        <div class="controls-section">
+            <button class="control-btn success" id="startLessonBtn" onclick="startLesson()">
+                ▶️ Start Lesson
+            </button>
+            <button class="control-btn" id="pauseLessonBtn" onclick="pauseLesson()" style="display: none;">
+                ⏸️ Pause
+            </button>
+            <button class="control-btn danger" id="stopLessonBtn" onclick="stopLesson()" style="display: none;">
+                ⏹️ Stop
+            </button>
+            <button class="control-btn" onclick="toggleDemo()">
+                👁️ Demo Mode
+            </button>
+            <button class="control-btn" onclick="toggleVoice()">
+                🎤 Voice Control
+            </button>
+        </div>
+
+        <!-- Progress Section -->
+        <div class="progress-section">
+            <h3>📈 Lesson Progress</h3>
+            <div class="progress-bar">
+                <div class="progress-fill" id="lessonProgress" style="width: 0%"></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-top: 10px;">
+                <span>Step <span id="currentStep">1</span> of <span id="totalSteps">8</span></span>
+                <span id="timeRemaining">5:30 remaining</span>
+            </div>
+        </div>
+
+        <!-- Feedback Panel -->
+        <div class="feedback-panel">
+            <h3>🎯 Real-time Feedback</h3>
+            <div class="feedback-score" id="currentScore">--</div>
+            <div id="feedbackText">Start moving to see your score!</div>
+            
+            <div class="feedback-details">
+                <div class="feedback-item">
+                    <h4>Posture</h4>
+                    <div id="postureScore">--</div>
+                </div>
+                <div class="feedback-item">
+                    <h4>Timing</h4>
+                    <div id="timingScore">--</div>
+                </div>
+                <div class="feedback-item">
+                    <h4>Expression</h4>
+                    <div id="expressionScore">--</div>
+                </div>
+                <div class="feedback-item">
+                    <h4>Energy</h4>
+                    <div id="energyScore">--</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Suggestions -->
+        <div class="ai-suggestions">
+            <h3>🧠 AI Suggestions</h3>
+            <div id="suggestionsList">
+                <div class="suggestion-item">
+                    📍 Keep your back straight during the hip movements
+                </div>
+                <div class="suggestion-item">
+                    🎵 Try to sync your arm movements with the beat
+                </div>
+                <div class="suggestion-item">
+                    ✨ Add more facial expressions to convey emotion
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Achievement Popup -->
+    <div class="achievement-popup" id="achievementPopup">
+        <h2>🏆 Achievement Unlocked!</h2>
+        <p id="achievementText">Perfect Posture Master</p>
+        <button class="control-btn" onclick="closeAchievement()">Continue</button>
+    </div>
+
+    <script>
+        class VirtualInstructor {
+            constructor() {
+                this.isActive = false;
+                this.currentLesson = 'bollywood-basics';
+                this.currentStep = 1;
+                this.totalSteps = 8;
+                this.score = 0;
+                this.sessionStartTime = null;
+                this.poseDetector = null;
+                this.videoStream = null;
+                this.recognition = null;
+                this.isListening = false;
+                
+                this.lessons = {
+                    'bollywood-basics': {
+                        name: 'Bollywood Basics',
+                        steps: [
+                            'Stand with feet shoulder-width apart',
+                            'Raise your arms gracefully to shoulder height',
+                            'Move your hips side to side with the rhythm',
+                            'Add hand gestures - palms up, then down',
+                            'Step forward with right foot, arms extended',
+                            'Turn your head left and right expressively',
+                            'Bring arms down in a flowing motion',
+                            'End with a graceful bow'
+                        ],
+                        tips: [
+                            'Keep your movements fluid and expressive',
+                            'Focus on the emotion behind each gesture',
+                            'Let the music guide your rhythm',
+                            'Practice facial expressions too!'
+                        ]
+                    },
+                    'kathak-pirouettes': {
+                        name: 'Kathak Pirouettes',
+                        steps: [
+                            'Start in the basic Kathak position',
+                            'Place arms in the correct mudra',
+                            'Focus your gaze on a fixed point',
+                            'Begin slow clockwise rotation',
+                            'Maintain balance on the ball of your foot',
+                            'Increase speed gradually',
+                            'Control the spin with core strength',
+                            'End with perfect balance'
+                        ],
+                        tips: [
+                            'Spot technique is crucial for balance',
+                            'Keep your core engaged throughout',
+                            'Start slow and build momentum',
+                            'Practice makes perfect!'
+                        ]
+                    }
+                };
+                
+                this.init();
+            }
+
+            init() {
+                this.setupEventListeners();
+                this.setupVoiceRecognition();
+                this.updateUI();
+            }
+
+            setupEventListeners() {
+                // Lesson selection
+                document.querySelectorAll('.lesson-card').forEach(card => {
+                    card.addEventListener('click', () => {
+                        document.querySelectorAll('.lesson-card').forEach(c => c.classList.remove('active'));
+                        card.classList.add('active');
+                        this.currentLesson = card.dataset.lesson;
+                        this.updateLessonInfo();
+                    });
+                });
+            }
+
+            setupVoiceRecognition() {
+                if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                    this.recognition = new SpeechRecognition();
+                    this.recognition.continuous = true;
+                    this.recognition.interimResults = true;
+                    this.recognition.lang = 'en-US';
+
+                    this.recognition.onresult = (event) => {
+                        const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase();
+                        this.handleVoiceCommand(transcript);
+                    };
+
+                    this.recognition.onstart = () => {
+                        this.isListening = true;
+                        document.getElementById('voiceIndicator').classList.add('listening');
+                        document.getElementById('voiceIndicator').textContent = '🎤 Listening...';
+                    };
+
+                    this.recognition.onend = () => {
+                        this.isListening = false;
+                        document.getElementById('voiceIndicator').classList.remove('listening');
+                        document.getElementById('voiceIndicator').textContent = '🎤 Say "Hey Instructor" to activate';
+                    };
+                }
+            }
+
+            handleVoiceCommand(transcript) {
+                if (transcript.includes('hey instructor') || transcript.includes('start lesson')) {
+                    this.startLesson();
+                } else if (transcript.includes('pause') || transcript.includes('stop')) {
+                    this.pauseLesson();
+                } else if (transcript.includes('next step')) {
+                    this.nextStep();
+                } else if (transcript.includes('repeat') || transcript.includes('again')) {
+                    this.repeatStep();
+                } else if (transcript.includes('show tip')) {
+                    this.showRandomTip();
+                }
+            }
+
+            async setupCamera() {
+                try {
+                    const constraints = {
+                        video: {
+                            width: { ideal: 640 },
+                            height: { ideal: 480 },
+                            facingMode: 'user'
+                        }
+                    };
+                    
+                    this.videoStream = await navigator.mediaDevices.getUserMedia(constraints);
+                    const video = document.getElementById('cameraFeed');
+                    video.srcObject = this.videoStream;
+                    
+                    // Wait for video to load and start playing
+                    await new Promise((resolve) => {
+                        video.onloadedmetadata = () => {
+                            video.play().then(() => {
+                                resolve();
+                            }).catch(error => {
+                                console.error('Video play failed:', error);
+                                resolve(); // Continue anyway
+                            });
+                        };
+                    });
+                    
+                    // Show video and hide placeholder
+                    video.style.display = 'block';
+                    document.getElementById('placeholderText').style.display = 'none';
+                    
+                    // Setup canvas overlay with proper dimensions
+                    const canvas = document.getElementById('poseOverlay');
+                    const videoArea = document.getElementById('videoArea');
+                    canvas.width = videoArea.offsetWidth;
+                    canvas.height = videoArea.offsetHeight;
+                    
+                    // Force canvas to match video area size
+                    canvas.style.width = '100%';
+                    canvas.style.height = '100%';
+                    
+                    // Initialize pose detection
+                    this.initializePoseDetection();
+                    
+                    this.showTip('Camera connected successfully! Ready to start tracking your moves.');
+                    
+                    return true;
+                } catch (error) {
+                    console.error('Camera setup failed:', error);
+                    let errorMessage = 'Camera access failed. ';
+                    
+                    if (error.name === 'NotAllowedError') {
+                        errorMessage += 'Please allow camera permissions and refresh the page.';
+                    } else if (error.name === 'NotFoundError') {
+                        errorMessage += 'No camera found on this device.';
+                    } else if (error.name === 'NotSupportedError') {
+                        errorMessage += 'Camera not supported on this browser.';
+                    } else {
+                        errorMessage += 'Please check your camera and try again.';
+                    }
+                    
+                    this.showTip(errorMessage);
+                    return false;
+                }
+            }
+
+            initializePoseDetection() {
+                // Setup canvas for pose overlay
+                const canvas = document.getElementById('poseOverlay');
+                const ctx = canvas.getContext('2d');
+                
+                // Simulate pose detection and draw overlay - in real implementation, use MediaPipe or similar
+                this.poseInterval = setInterval(() => {
+                    if (this.isActive && canvas.width > 0) {
+                        this.analyzePose();
+                        this.drawPoseOverlay(ctx, canvas);
+                    }
+                }, 500);
+            }
+
+            drawPoseOverlay(ctx, canvas) {
+                // Clear canvas
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // Draw pose estimation points (simulated)
+                ctx.fillStyle = '#f5576c';
+                ctx.strokeStyle = '#667eea';
+                ctx.lineWidth = 3;
+                
+                // Simulate joint positions
+                const joints = [
+                    { x: canvas.width * 0.5, y: canvas.height * 0.2 }, // Head
+                    { x: canvas.width * 0.4, y: canvas.height * 0.4 }, // Left shoulder
+                    { x: canvas.width * 0.6, y: canvas.height * 0.4 }, // Right shoulder
+                    { x: canvas.width * 0.35, y: canvas.height * 0.6 }, // Left elbow
+                    { x: canvas.width * 0.65, y: canvas.height * 0.6 }, // Right elbow
+                    { x: canvas.width * 0.5, y: canvas.height * 0.5 },  // Center
+                ];
+                
+                // Draw joints
+                joints.forEach(joint => {
+                    ctx.beginPath();
+                    ctx.arc(joint.x, joint.y, 8, 0, 2 * Math.PI);
+                    ctx.fill();
+                });
+                
+                // Draw connections
+                ctx.beginPath();
+                ctx.moveTo(joints[1].x, joints[1].y); // Left shoulder
+                ctx.lineTo(joints[2].x, joints[2].y); // Right shoulder
+                ctx.moveTo(joints[1].x, joints[1].y); // Left shoulder
+                ctx.lineTo(joints[3].x, joints[3].y); // Left elbow
+                ctx.moveTo(joints[2].x, joints[2].y); // Right shoulder
+                ctx.lineTo(joints[4].x, joints[4].y); // Right elbow
+                ctx.stroke();
+                
+                // Add performance indicator
+                ctx.fillStyle = 'rgba(102, 126, 234, 0.8)';
+                ctx.fillRect(10, 10, 200, 40);
+                ctx.fillStyle = 'white';
+                ctx.font = '16px Arial';
+                ctx.fillText(`Performance: ${this.score}%`, 20, 35);
+            }
+
+            analyzePose() {
+                // Simulate pose analysis and scoring
+                const scores = {
+                    posture: Math.floor(Math.random() * 30) + 70,
+                    timing: Math.floor(Math.random() * 25) + 75,
+                    expression: Math.floor(Math.random() * 35) + 65,
+                    energy: Math.floor(Math.random() * 40) + 60
+                };
+
+                const overall = Math.floor((scores.posture + scores.timing + scores.expression + scores.energy) / 4);
+                this.score = overall; // Store score for overlay display
+                
+                this.updateFeedback(overall, scores);
+                
+                // Provide real-time tips
+                if (overall > 85) {
+                    this.showTip('Excellent form! Keep it up!');
+                } else if (overall > 70) {
+                    this.showTip('Good job! Try to be more expressive.');
+                } else {
+                    this.showTip('Focus on your posture and timing.');
+                }
+
+                // Check for achievements
+                if (overall > 90 && Math.random() > 0.7) {
+                    this.showAchievement('Perfectionist', 'Scored 90+ consistently!');
+                }
+            }
+
+            updateFeedback(score, details) {
+                document.getElementById('currentScore').textContent = score;
+                document.getElementById('postureScore').textContent = details.posture;
+                document.getElementById('timingScore').textContent = details.timing;
+                document.getElementById('expressionScore').textContent = details.expression;
+                document.getElementById('energyScore').textContent = details.energy;
+
+                const feedbackText = document.getElementById('feedbackText');
+                if (score > 85) {
+                    feedbackText.textContent = '🌟 Excellent! You\'re dancing like a pro!';
+                } else if (score > 70) {
+                    feedbackText.textContent = '👍 Good work! Keep refining your technique.';
+                } else if (score > 55) {
+                    feedbackText.textContent = '📈 You\'re improving! Focus on the instructor\'s tips.';
+                } else {
+                    feedbackText.textContent = '💪 Keep practicing! Watch the demo for guidance.';
+                }
+            }
+
+            showTip(message) {
+                const tipsElement = document.getElementById('instructorTips');
+                const tipText = document.getElementById('tipText');
+                tipText.textContent = message;
+                tipsElement.style.display = 'block';
+                
+                setTimeout(() => {
+                    tipsElement.style.display = 'none';
+                }, 4000);
+            }
+
+            showAchievement(title, description) {
+                const popup = document.getElementById('achievementPopup');
+                const text = document.getElementById('achievementText');
+                text.innerHTML = `<strong>${title}</strong><br>${description}`;
+                popup.style.display = 'block';
+                
+                // Auto-close after 3 seconds
+                setTimeout(() => {
+                    this.closeAchievement();
+                }, 3000);
+            }
+
+            updateLessonInfo() {
+                const lesson = this.lessons[this.currentLesson];
+                if (lesson) {
+                    this.totalSteps = lesson.steps.length;
+                    document.getElementById('totalSteps').textContent = this.totalSteps;
+                    this.updateStepInfo();
+                }
+            }
+
+            updateStepInfo() {
+                document.getElementById('currentStep').textContent = this.currentStep;
+                const progress = (this.currentStep / this.totalSteps) * 100;
+                document.getElementById('lessonProgress').style.width = progress + '%';
+                
+                const lesson = this.lessons[this.currentLesson];
+                if (lesson && lesson.steps[this.currentStep - 1]) {
+                    this.showTip(`Step ${this.currentStep}: ${lesson.steps[this.currentStep - 1]}`);
+                }
+            }
+
+            nextStep() {
+                if (this.currentStep < this.totalSteps) {
+                    this.currentStep++;
+                    this.updateStepInfo();
+                } else {
+                    this.completeLesson();
+                }
+            }
+
+            repeatStep() {
+                this.updateStepInfo();
+            }
+
+            completeLesson() {
+                this.showAchievement('Lesson Complete!', 'You\'ve mastered all the steps!');
+                setTimeout(() => {
+                    this.stopLesson();
+                }, 3000);
+            }
+
+            showRandomTip() {
+                const lesson = this.lessons[this.currentLesson];
+                if (lesson && lesson.tips.length > 0) {
+                    const randomTip = lesson.tips[Math.floor(Math.random() * lesson.tips.length)];
+                    this.showTip(randomTip);
+                }
+            }
+
+            updateUI() {
+                this.updateLessonInfo();
+            }
+
+            stopLesson() {
+                this.isActive = false;
+                this.currentStep = 1;
+                
+                // Stop camera
+                if (this.videoStream) {
+                    this.videoStream.getTracks().forEach(track => track.stop());
+                    this.videoStream = null;
+                }
+                
+                // Clear pose detection interval
+                if (this.poseInterval) {
+                    clearInterval(this.poseInterval);
+                    this.poseInterval = null;
+                }
+                
+                // Clear canvas
+                const canvas = document.getElementById('poseOverlay');
+                const ctx = canvas.getContext('2d');
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // Reset UI
+                document.getElementById('cameraFeed').style.display = 'none';
+                document.getElementById('placeholderText').style.display = 'block';
+                document.getElementById('startLessonBtn').style.display = 'inline-flex';
+                document.getElementById('pauseLessonBtn').style.display = 'none';
+                document.getElementById('stopLessonBtn').style.display = 'none';
+                document.getElementById('instructorTips').style.display = 'none';
+                
+                // Reset progress
+                document.getElementById('lessonProgress').style.width = '0%';
+                document.getElementById('currentScore').textContent = '--';
+                document.getElementById('postureScore').textContent = '--';
+                document.getElementById('timingScore').textContent = '--';
+                document.getElementById('expressionScore').textContent = '--';
+                document.getElementById('energyScore').textContent = '--';
+                document.getElementById('feedbackText').textContent = 'Start moving to see your score!';
+                
+                this.showTip('Lesson stopped. Great practice session!');
+            }
+
+            pauseLesson() {
+                if (this.isActive) {
+                    this.isActive = false;
+                    document.getElementById('pauseLessonBtn').textContent = '▶️ Resume';
+                    this.showTip('Lesson paused. Click Resume to continue.');
+                } else {
+                    this.isActive = true;
+                    document.getElementById('pauseLessonBtn').textContent = '⏸️ Pause';
+                    this.showTip('Lesson resumed. Keep up the great work!');
+                }
+            }
+
+            // Debug method for camera testing
+            testCamera() {
+                const video = document.getElementById('cameraFeed');
+                const canvas = document.getElementById('poseOverlay');
+                
+                console.log('Camera test results:');
+                console.log('Video element:', video);
+                console.log('Video stream:', this.videoStream);
+                console.log('Video playing:', !video.paused);
+                console.log('Video dimensions:', video.videoWidth, 'x', video.videoHeight);
+                console.log('Canvas dimensions:', canvas.width, 'x', canvas.height);
+                console.log('Video display style:', video.style.display);
+                
+                this.showTip(`Camera Debug - Video: ${video.videoWidth}x${video.videoHeight}, Playing: ${!video.paused}`);
+            }
+        }
+
+        // Global functions for button controls
+        let instructor = new VirtualInstructor();
+
+        async function startLesson() {
+            const success = await instructor.setupCamera();
+            if (success) {
+                instructor.isActive = true;
+                instructor.sessionStartTime = Date.now();
+                instructor.currentStep = 1;
+                
+                document.getElementById('startLessonBtn').style.display = 'none';
+                document.getElementById('pauseLessonBtn').style.display = 'inline-flex';
+                document.getElementById('stopLessonBtn').style.display = 'inline-flex';
+                
+                instructor.updateStepInfo();
+                instructor.showTip('Lesson started! Follow the steps and I\'ll guide you.');
+                
+                // Auto-advance steps every 30 seconds
+                instructor.stepTimer = setInterval(() => {
+                    instructor.nextStep();
+                }, 30000);
+            }
+        }
+
+        function pauseLesson() {
+            instructor.isActive = false;
+            clearInterval(instructor.stepTimer);
+            
+            const pauseBtn = document.getElementById('pauseLessonBtn');
+            if (pauseBtn.textContent.includes('Pause')) {
+                pauseBtn.innerHTML = '▶️ Resume';
+                instructor.showTip('Lesson paused. Click Resume when ready.');
+            } else {
+                pauseBtn.innerHTML = '⏸️ Pause';
+                instructor.isActive = true;
+                instructor.showTip('Lesson resumed!');
+                instructor.stepTimer = setInterval(() => {
+                    instructor.nextStep();
+                }, 30000);
+            }
+        }
+
+        function stopLesson() {
+            instructor.isActive = false;
+            clearInterval(instructor.stepTimer);
+            
+            if (instructor.videoStream) {
+                instructor.videoStream.getTracks().forEach(track => track.stop());
+            }
+            
+            document.getElementById('cameraFeed').style.display = 'none';
+            document.getElementById('placeholderText').style.display = 'block';
+            document.getElementById('instructorTips').style.display = 'none';
+            
+            document.getElementById('startLessonBtn').style.display = 'inline-flex';
+            document.getElementById('pauseLessonBtn').style.display = 'none';
+            document.getElementById('stopLessonBtn').style.display = 'none';
+            document.getElementById('pauseLessonBtn').innerHTML = '⏸️ Pause';
+            
+            // Reset UI
+            document.getElementById('currentScore').textContent = '--';
+            document.getElementById('feedbackText').textContent = 'Start moving to see your score!';
+            instructor.currentStep = 1;
+            instructor.updateUI();
+        }
+
+        function toggleDemo() {
+            // Test camera functionality and show demo
+            if (!instructor.videoStream) {
+                instructor.setupCamera().then(success => {
+                    if (success) {
+                        instructor.showTip('Demo mode: Camera active! This is how your video will look during lessons.');
+                        
+                        // Show demo overlay
+                        setTimeout(() => {
+                            const canvas = document.getElementById('poseOverlay');
+                            const ctx = canvas.getContext('2d');
+                            instructor.drawPoseOverlay(ctx, canvas);
+                        }, 1000);
+                    }
+                });
+            } else {
+                instructor.showTip('Demo mode: Camera already active! Click Start Lesson to begin tracking.');
+            }
+        }
+
+        function toggleVoice() {
+            if (instructor.recognition) {
+                if (instructor.isListening) {
+                    instructor.recognition.stop();
+                } else {
+                    instructor.recognition.start();
+                }
+            } else {
+                instructor.showTip('Voice recognition not supported in this browser.');
+            }
+        }
+
+        function closeAchievement() {
+            document.getElementById('achievementPopup').style.display = 'none';
+        }
+
+        function previewLesson() {
+            const selectedLesson = instructor.currentLesson;
+            const lesson = instructor.lessons[selectedLesson];
+            
+            if (lesson) {
+                instructor.showTip(`Preview: ${lesson.name} - ${lesson.steps.length} steps total`);
+                
+                // Show preview of all steps
+                let previewText = `${lesson.name} Steps:\n`;
+                lesson.steps.forEach((step, index) => {
+                    previewText += `${index + 1}. ${step}\n`;
+                });
+                
+                // Update suggestion panel with preview
+                const suggestionsList = document.getElementById('suggestionsList');
+                suggestionsList.innerHTML = `
+                    <div class="suggestion-item">
+                        <h4>📖 ${lesson.name} Preview</h4>
+                        ${lesson.steps.map((step, index) => 
+                            `<p><strong>Step ${index + 1}:</strong> ${step}</p>`
+                        ).join('')}
+                    </div>
+                    <div class="suggestion-item">
+                        <h4>💡 Pro Tips</h4>
+                        ${lesson.tips.map(tip => `<p>• ${tip}</p>`).join('')}
+                    </div>
+                `;
+                
+                instructor.showTip('Lesson preview loaded! Check the AI Suggestions section below.');
+            } else {
+                instructor.showTip('Please select a lesson first.');
+            }
+        }
+
+        function loadMove() {
+            const selectedLesson = instructor.currentLesson;
+            const lesson = instructor.lessons[selectedLesson];
+            
+            if (lesson) {
+                // Reset to first step
+                instructor.currentStep = 1;
+                instructor.updateLessonInfo();
+                
+                // Show current move instructions
+                const currentMove = lesson.steps[0];
+                instructor.showTip(`Loaded: ${lesson.name} - Step 1: ${currentMove}`);
+                
+                // Update feedback panel
+                document.getElementById('feedbackText').textContent = `Ready to start: ${lesson.name}`;
+                
+                // Highlight the lesson info
+                document.getElementById('currentStep').style.color = '#f5576c';
+                setTimeout(() => {
+                    document.getElementById('currentStep').style.color = '';
+                }, 2000);
+                
+            } else {
+                instructor.showTip('Please select a lesson first.');
+            }
+        }
+
+        // Update stats periodically
+        setInterval(() => {
+            if (instructor.isActive) {
+                // Simulate stat updates
+                const sessionCount = parseInt(document.getElementById('sessionCount').textContent) || 0;
+                const avgScore = parseInt(document.getElementById('avgScore').textContent) || 0;
+                
+                if (Math.random() > 0.8) {
+                    document.getElementById('avgScore').textContent = Math.min(100, avgScore + 1);
+                }
+            }
+        }, 5000);
+
+        // Initialize instructor when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            instructor = new VirtualInstructor();
+        });
+    </script>
+</body>
+</html>

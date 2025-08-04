@@ -30,6 +30,10 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 import mediapipe as mp
+import sys
+import os
+sys.path.append(os.path.dirname(__file__))
+
 import logging
 from pathlib import Path
 from pose_tracker import compare_poses

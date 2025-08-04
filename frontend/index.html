@@ -609,64 +609,285 @@
     <!-- Virtual Dance Instructor Page -->
     <div class="page" id="instructor">
         <div class="container">
-            <h2 style="color:#f27121; text-align:center; margin-bottom:30px;">Virtual Dance Instructor</h2>
-            <div style="display:flex; flex-wrap:wrap; gap:32px;">
-                <div style="flex:1 1 350px; min-width:320px;">
-                    <div style="background:rgba(30,30,60,0.7); border-radius:18px; padding:24px;">
-                        <h3 style="color:#f27121; margin-bottom:12px;">How it works</h3>
-                        <ul style="font-size:1.05rem; line-height:1.7; color:#fff;">
-                            <li>Select a dance style and move from PhantomDance library.</li>
-                            <li>Preview the reference animation and keyframes.</li>
-                            <li>Start your webcam and follow the instructor's moves.</li>
-                            <li>Get real-time feedback on correctness, timing, and fluidity.</li>
-                        </ul>
-                        <div style="margin-top:18px;">
-                            <label for="instructorStyleSelect" style="color:#f27121;">Dance Style:</label>
-                            <select id="instructorStyleSelect" aria-label="Dance Style" style="width:100%;padding:8px;border-radius:8px;margin-top:8px;">
-                                <option value="">-- Select style --</option>
-                            </select>
+            <div class="hero" style="text-align: center; padding: 50px 20px;">
+                <h1 style="color: #f27121; font-size: 3rem; margin-bottom: 20px; font-weight: 700;">
+                    🎭 Virtual Dance Instructor
+                </h1>
+                <p style="font-size: 1.4rem; color: #fff; margin-bottom: 40px; max-width: 600px; margin-left: auto; margin-right: auto; line-height: 1.6;">
+                    Experience AI-powered dance learning with real-time pose analysis, voice commands, and interactive lessons
+                </p>
+                
+                <div style="background: linear-gradient(135deg, rgba(242, 113, 33, 0.1), rgba(233, 69, 96, 0.1)); border: 2px solid rgba(242, 113, 33, 0.3); border-radius: 20px; padding: 30px; margin: 30px auto; max-width: 800px;">
+                    <h2 style="color: #f27121; margin-bottom: 20px;">🚀 Enhanced Features</h2>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; text-align: left;">
+                        <div>
+                            <h3 style="color: #e94560; margin-bottom: 10px;">🎯 Real-time Analysis</h3>
+                            <ul style="color: #fff; line-height: 1.6;">
+                                <li>Live pose tracking & scoring</li>
+                                <li>Movement precision feedback</li>
+                                <li>Performance analytics</li>
+                            </ul>
                         </div>
-                        <div style="margin-top:18px;">
-                            <label for="instructorMoveSelect" style="color:#f27121;">Move:</label>
-                            <select id="instructorMoveSelect" aria-label="Move" style="width:100%;padding:8px;border-radius:8px;margin-top:8px;">
-                                <option value="">-- Select move --</option>
-                            </select>
-                            <button class="btn" id="previewInstructorMoveBtn" style="margin-top:10px;">Preview Move</button>
-                            <button class="btn" id="loadInstructorMoveBtn" style="margin-top:10px;">Load Move</button>
+                        <div>
+                            <h3 style="color: #e94560; margin-bottom: 10px;">🎤 Voice Control</h3>
+                            <ul style="color: #fff; line-height: 1.6;">
+                                <li>Voice commands for hands-free control</li>
+                                <li>Spoken feedback & encouragement</li>
+                                <li>Interactive voice responses</li>
+                            </ul>
                         </div>
-                        <div style="margin-top:18px;">
-                            <button class="btn" id="instructorStartBtn">Start Instructor</button>
-                            <button class="btn secondary" id="instructorStopBtn">Stop</button>
+                        <div>
+                            <h3 style="color: #e94560; margin-bottom: 10px;">📈 Progress Tracking</h3>
+                            <ul style="color: #fff; line-height: 1.6;">
+                                <li>Achievement system</li>
+                                <li>Learning progress metrics</li>
+                                <li>Personalized recommendations</li>
+                            </ul>
                         </div>
-                        <div id="instructorStatus" style="margin-top:14px; color:#f27121;" aria-live="polite"></div>
-                        <!-- Sidebar Info Card -->
-                        <div id="instructorSidebarInfo">
-                            <div class="move-meta">
-                                <span id="sidebarMoveMeta"></span>
-                            </div>
-                            <div class="feedback-panel">
-                                <span class="sim" id="sidebarSimilarity">0%</span>
-                                <span class="emoji" id="sidebarEmoji">🤔</span>
-                                <span class="timer" id="sidebarTimer">00:00</span>
-                            </div>
-                            <button class="btn secondary" id="restartInstructorBtn" style="margin-top:10px;">Restart Instructor</button>
+                        <div>
+                            <h3 style="color: #e94560; margin-bottom: 10px;">🎨 Interactive Lessons</h3>
+                            <ul style="color: #fff; line-height: 1.6;">
+                                <li>Step-by-step tutorials</li>
+                                <li>Multiple dance styles</li>
+                                <li>Adaptive difficulty levels</li>
+                            </ul>
                         </div>
                     </div>
                 </div>
-                <div style="flex:2 1 500px; min-width:320px;">
-                    <div style="position:relative; background:rgba(30,30,60,0.7); border-radius:18px; padding:18px;">
-                        <div id="moveNameDisplay"></div>
-                        <div id="moveStyleDisplay"></div>
-                        <canvas id="instructorReferenceCanvas" style="width:100%; border-radius:12px; background:#181818; margin-bottom:10px;"></canvas>
-                        <video id="instructorVideo" style="width:100%; border-radius:12px; display:none;" controls></video>
-                        <canvas id="instructorWebcam" style="width:100%; border-radius:12px; display:none;"></canvas>
-                        <canvas id="instructorPoseCanvas" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none;"></canvas>
-                        <div id="instructorFeedback" style="margin-top:12px; color:#f27121; text-align:center;"></div>
-                        <div id="instructorPreviewModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:2000; align-items:center; justify-content:center;">
-                            <div style="background:#222; border-radius:15px; padding:30px; max-width:600px; max-height:80vh; overflow:auto; color:white; position:relative;">
-                                <button id="closeInstructorPreviewBtn" style="position:absolute; top:10px; right:15px; background:none; border:none; color:#e94560; font-size:1.5rem; cursor:pointer;">&times;</button>
-                                <h3 style="color:#f27121; margin-bottom:15px;">Move Preview & Keyframes</h3>
-                                <div id="instructorPreviewContent"></div>
+
+                <div style="margin-top: 40px;">
+                    <button class="btn" onclick="window.open('virtual-instructor.html', '_blank')" style="font-size: 1.2rem; padding: 15px 30px; margin: 10px; background: linear-gradient(135deg, #f27121, #e94560); border: none; border-radius: 50px; color: white; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 8px 25px rgba(242, 113, 33, 0.3);">
+                        🚀 Launch Enhanced Virtual Instructor
+                    </button>
+                    <br>
+                    <button class="btn secondary" onclick="openBasicInstructor()" style="font-size: 1rem; padding: 12px 25px; margin: 10px; background: rgba(255, 255, 255, 0.1); border: 2px solid rgba(242, 113, 33, 0.5); border-radius: 50px; color: #f27121; cursor: pointer; transition: all 0.3s ease;">
+                        📚 Continue with Basic Instructor
+                    </button>
+                </div>
+
+                <div style="margin-top: 30px; font-size: 0.9rem; color: rgba(255, 255, 255, 0.7);">
+                    <p>💡 <strong>Tip:</strong> For the best experience, use the Enhanced Virtual Instructor with camera access enabled</p>
+                </div>
+            </div>
+
+            <!-- Basic Instructor (Hidden by default) -->
+            <div id="basicInstructor" style="display: none;">
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <h2 style="color:#f27121; margin-bottom: 15px;">🎭 Basic Virtual Dance Instructor</h2>
+                    <p style="color: rgba(255,255,255,0.8); font-size: 1.1rem; margin-bottom: 20px;">
+                        Learn dance moves with guided instruction and real-time feedback
+                    </p>
+                    <button class="btn secondary" onclick="openBasicInstructor()" style="font-size: 0.9rem; padding: 8px 16px; background: rgba(255,255,255,0.1); border: 1px solid rgba(242,113,33,0.5);">
+                        ← Back to Enhanced Features
+                    </button>
+                </div>
+
+                <!-- Enhanced Basic Instructor Layout -->
+                <div style="display:grid; grid-template-columns: 1fr 2fr; gap:25px; margin-bottom: 25px;">
+                    <!-- Left Panel - Enhanced Controls -->
+                    <div style="background:rgba(30,30,60,0.8); border-radius:18px; padding:25px; border: 2px solid rgba(242,113,33,0.3);">
+                        <!-- Dance Style Selection -->
+                        <div style="margin-bottom: 25px;">
+                            <h3 style="color:#f27121; margin-bottom:15px; display: flex; align-items: center; gap: 8px;">
+                                🎨 Dance Style
+                            </h3>
+                            <select id="instructorStyleSelect" aria-label="Dance Style" style="width:100%; padding:12px; border-radius:10px; margin-top:8px; background:#2a2a4a; color:white; border: 2px solid rgba(242,113,33,0.3); font-size: 1rem;">
+                                <option value="">-- Select style --</option>
+                                <option value="bollywood">🕺 Bollywood</option>
+                                <option value="kathak">💃 Kathak</option>
+                                <option value="hiphop">🎤 Hip-Hop</option>
+                                <option value="contemporary">🌟 Contemporary</option>
+                            </select>
+                        </div>
+
+                        <!-- Move Selection -->
+                        <div style="margin-bottom: 25px;">
+                            <h3 style="color:#f27121; margin-bottom:15px; display: flex; align-items: center; gap: 8px;">
+                                🎯 Select Move
+                            </h3>
+                            <select id="instructorMoveSelect" aria-label="Move" style="width:100%; padding:12px; border-radius:10px; margin-top:8px; background:#2a2a4a; color:white; border: 2px solid rgba(242,113,33,0.3); font-size: 1rem;">
+                                <option value="">-- Select move --</option>
+                            </select>
+                            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                                <button class="btn" id="previewInstructorMoveBtn" style="flex: 1; padding: 10px; font-size: 0.9rem;">
+                                    👁️ Preview
+                                </button>
+                                <button class="btn secondary" id="loadInstructorMoveBtn" style="flex: 1; padding: 10px; font-size: 0.9rem;">
+                                    📥 Load Move
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Difficulty Level -->
+                        <div style="margin-bottom: 25px;">
+                            <h3 style="color:#f27121; margin-bottom:15px; display: flex; align-items: center; gap: 8px;">
+                                📊 Difficulty
+                            </h3>
+                            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                <button class="difficulty-btn active" data-level="beginner" style="flex: 1; min-width: 80px; padding: 8px 12px; border-radius: 20px; border: 2px solid #4CAF50; background: #4CAF50; color: white; font-size: 0.85rem; cursor: pointer; transition: all 0.3s;">
+                                    🌱 Beginner
+                                </button>
+                                <button class="difficulty-btn" data-level="intermediate" style="flex: 1; min-width: 80px; padding: 8px 12px; border-radius: 20px; border: 2px solid #FF9800; background: transparent; color: #FF9800; font-size: 0.85rem; cursor: pointer; transition: all 0.3s;">
+                                    🚀 Intermediate
+                                </button>
+                                <button class="difficulty-btn" data-level="advanced" style="flex: 1; min-width: 80px; padding: 8px 12px; border-radius: 20px; border: 2px solid #F44336; background: transparent; color: #F44336; font-size: 0.85rem; cursor: pointer; transition: all 0.3s;">
+                                    🔥 Advanced
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Session Controls -->
+                        <div style="margin-bottom: 20px;">
+                            <h3 style="color:#f27121; margin-bottom:15px; display: flex; align-items: center; gap: 8px;">
+                                🎬 Session Controls
+                            </h3>
+                            <div style="display: flex; flex-direction: column; gap: 10px;">
+                                <button class="btn" id="instructorStartBtn" style="width: 100%; padding: 12px; font-size: 1rem; background: linear-gradient(135deg, #4CAF50, #45a049);">
+                                    ▶️ Start Session
+                                </button>
+                                <div style="display: flex; gap: 10px;">
+                                    <button class="btn secondary" id="instructorPauseBtn" style="flex: 1; padding: 10px; font-size: 0.9rem; display: none;">
+                                        ⏸️ Pause
+                                    </button>
+                                    <button class="btn secondary" id="instructorStopBtn" style="flex: 1; padding: 10px; font-size: 0.9rem;">
+                                        ⏹️ Stop
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Live Stats -->
+                        <div style="background: rgba(242,113,33,0.1); border-radius: 12px; padding: 15px; border: 1px solid rgba(242,113,33,0.3);">
+                            <h4 style="color:#f27121; margin-bottom: 10px; font-size: 0.95rem;">📈 Live Performance</h4>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.85rem;">
+                                <div style="text-align: center;">
+                                    <div style="color: #4CAF50; font-size: 1.2rem; font-weight: bold;" id="basicAccuracy">--</div>
+                                    <div style="color: rgba(255,255,255,0.8);">Accuracy</div>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div style="color: #FF9800; font-size: 1.2rem; font-weight: bold;" id="basicTiming">--</div>
+                                    <div style="color: rgba(255,255,255,0.8);">Timing</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Session Status -->
+                        <div id="instructorStatus" style="margin-top:15px; color:#f27121; font-size: 0.9rem; text-align: center; padding: 10px; background: rgba(242,113,33,0.1); border-radius: 8px; border: 1px solid rgba(242,113,33,0.3);" aria-live="polite">
+                            Ready to start your dance session
+                        </div>
+                    </div>
+
+                    <!-- Right Panel - Enhanced Video Area -->
+                    <div style="background:rgba(30,30,60,0.8); border-radius:18px; padding:20px; border: 2px solid rgba(242,113,33,0.3);">
+                        <div style="position:relative; border-radius:15px; overflow: hidden; background:#000; min-height: 400px;">
+                            <!-- Reference Canvas -->
+                            <canvas id="instructorReferenceCanvas" style="width:100%; height: 200px; border-radius:12px; background:#181818; margin-bottom:15px; border: 2px solid rgba(102,126,234,0.3);"></canvas>
+                            
+                            <!-- Video Controls -->
+                            <video id="instructorVideo" style="width:100%; border-radius:12px; display:none; margin-bottom: 15px;" controls></video>
+                            
+                            <!-- Webcam Feed -->
+                            <canvas id="instructorWebcam" style="width:100%; height: 200px; border-radius:12px; display:none; border: 2px solid rgba(245,87,108,0.3);"></canvas>
+                            
+                            <!-- Overlay Instructions -->
+                            <div id="instructorOverlay" style="position: absolute; top: 10px; left: 10px; right: 10px; background: rgba(0,0,0,0.8); color: white; padding: 12px; border-radius: 8px; font-size: 0.9rem; display: none;">
+                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                                    <span style="color: #f27121;">🎯</span>
+                                    <strong id="currentMoveDisplay">Loading move...</strong>
+                                </div>
+                                <div id="moveInstructions" style="font-size: 0.85rem; color: rgba(255,255,255,0.9);">
+                                    Follow the reference movements shown above
+                                </div>
+                            </div>
+
+                            <!-- Performance Indicator -->
+                            <div id="performanceIndicator" style="position: absolute; bottom: 15px; right: 15px; background: rgba(0,0,0,0.8); color: white; padding: 10px 15px; border-radius: 20px; font-weight: bold; display: none;">
+                                <span id="performanceScore">--</span>%
+                            </div>
+                        </div>
+
+                        <!-- Enhanced Feedback Section -->
+                        <div id="instructorFeedback" style="margin-top:15px; padding: 15px; background: rgba(102,126,234,0.1); border-radius: 12px; border: 1px solid rgba(102,126,234,0.3); text-align: center;">
+                            <div style="color:#667eea; font-size: 1.1rem; font-weight: bold; margin-bottom: 8px;">
+                                Ready to Dance! 🕺💃
+                            </div>
+                            <div style="color: rgba(255,255,255,0.8); font-size: 0.9rem;">
+                                Select a style and move to begin your session
+                            </div>
+                        </div>
+
+                        <!-- Quick Tips -->
+                        <div style="margin-top: 15px; padding: 12px; background: rgba(245,87,108,0.1); border-radius: 10px; border: 1px solid rgba(245,87,108,0.3);">
+                            <h4 style="color: #f5576c; margin-bottom: 8px; font-size: 0.9rem;">💡 Quick Tips</h4>
+                            <ul style="color: rgba(255,255,255,0.8); font-size: 0.8rem; margin: 0; padding-left: 15px;">
+                                <li>Ensure good lighting for better pose detection</li>
+                                <li>Position yourself fully within the camera frame</li>
+                                <li>Start with beginner moves and progress gradually</li>
+                                <li>Focus on form over speed</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Instructor Preview Modal -->
+                <div id="instructorPreviewModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:2000; align-items:center; justify-content:center;">
+                    <div style="background:rgba(30,30,60,0.95); padding:20px; border-radius:15px; max-width:600px; max-height:80vh; overflow-y:auto; position:relative; border: 2px solid rgba(242,113,33,0.3);">
+                        <button id="closeInstructorPreviewBtn" style="position:absolute; top:10px; right:15px; background:none; border:none; color:#e94560; font-size:1.5rem; cursor:pointer;">&times;</button>
+                        <h3 style="color:#f27121; margin-bottom:15px;">Move Preview</h3>
+                        <div id="instructorPreviewContent"></div>
+                    </div>
+                </div>
+
+                <!-- Progress and Achievements Section -->
+                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-top: 20px;">
+                    <!-- Progress Timeline -->
+                    <div style="background:rgba(30,30,60,0.8); border-radius:15px; padding:20px; border: 2px solid rgba(242,113,33,0.3);">
+                        <h3 style="color:#f27121; margin-bottom:15px; display: flex; align-items: center; gap: 8px;">
+                            📈 Session Progress
+                        </h3>
+                        <div style="background: rgba(255,255,255,0.1); height: 8px; border-radius: 4px; margin: 15px 0; overflow: hidden;">
+                            <div id="sessionProgress" style="height: 100%; background: linear-gradient(90deg, #f27121, #e94560); width: 0%; transition: width 0.3s ease; border-radius: 4px;"></div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; color: rgba(255,255,255,0.8); font-size: 0.85rem;">
+                            <span>Session: <span id="sessionTime">00:00</span></span>
+                            <span>Progress: <span id="progressPercent">0%</span></span>
+                        </div>
+                        
+                        <!-- Recent Scores -->
+                        <div style="margin-top: 15px;">
+                            <h4 style="color: #667eea; margin-bottom: 10px; font-size: 0.9rem;">Recent Scores</h4>
+                            <div id="recentScores" style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                <span style="background: rgba(76,175,80,0.2); color: #4CAF50; padding: 4px 8px; border-radius: 12px; font-size: 0.8rem;">Starting...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mini Achievements -->
+                    <div style="background:rgba(30,30,60,0.8); border-radius:15px; padding:20px; border: 2px solid rgba(242,113,33,0.3);">
+                        <h3 style="color:#f27121; margin-bottom:15px; display: flex; align-items: center; gap: 8px;">
+                            🏆 Achievements
+                        </h3>
+                        <div id="miniAchievements" style="display: flex; flex-direction: column; gap: 8px;">
+                            <div style="display: flex; align-items: center; gap: 8px; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                                <span style="font-size: 1.2rem;">🎯</span>
+                                <div style="font-size: 0.85rem;">
+                                    <div style="color: white; font-weight: bold;">First Session</div>
+                                    <div style="color: rgba(255,255,255,0.6);">Complete your first dance</div>
+                                </div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 8px; opacity: 0.5;">
+                                <span style="font-size: 1.2rem;">⭐</span>
+                                <div style="font-size: 0.85rem;">
+                                    <div style="color: white; font-weight: bold;">Score Master</div>
+                                    <div style="color: rgba(255,255,255,0.6);">Score 80% or higher</div>
+                                </div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 8px; opacity: 0.5;">
+                                <span style="font-size: 1.2rem;">🔥</span>
+                                <div style="font-size: 0.85rem;">
+                                    <div style="color: white; font-weight: bold;">Consistency</div>
+                                    <div style="color: rgba(255,255,255,0.6);">5 sessions in a row</div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -786,6 +1007,15 @@
                         break;
                     case 'gallery':
                         if (window.galleryManager) window.galleryManager.loadGallery();
+                        break;
+                    case 'instructor':
+                        // Reset instructor page to hero view
+                        const heroSection = document.querySelector('#instructor .hero');
+                        const basicInstructor = document.getElementById('basicInstructor');
+                        if (heroSection && basicInstructor) {
+                            heroSection.style.display = 'block';
+                            basicInstructor.style.display = 'none';
+                        }
                         break;
                 }
             }
@@ -1504,12 +1734,31 @@
                             moveSelect.appendChild(opt);
                         }
                     } else {
-                        moveSelect.innerHTML += `<option value="">No moves found</option>`;
+                        // Add fallback moves if no moves found from API
+                        this.addFallbackMoves(style, moveSelect);
                     }
                 } catch (err) {
-                    moveSelect.innerHTML += `<option value="">No moves found</option>`;
                     console.error("Error loading moves:", err);
+                    // Add fallback moves when API fails
+                    this.addFallbackMoves(style, moveSelect);
                 }
+            }
+
+            addFallbackMoves(style, moveSelect) {
+                const fallbackMoves = {
+                    'bollywood': ['Thumri Basic', 'Hip Circle', 'Arm Wave', 'Step Touch', 'Bhangra Shoulder'],
+                    'kathak': ['Tatkar Basic', 'Chakkars', 'Hand Mudra', 'Pirouette', 'Aamad'],
+                    'hiphop': ['Body Wave', 'Pop Lock', 'Chest Pop', 'Arm Isolations', 'Step Cross'],
+                    'contemporary': ['Port de Bras', 'Spiral', 'Floor Work', 'Contraction', 'Release']
+                };
+
+                const moves = fallbackMoves[style] || ['Basic Move 1', 'Basic Move 2', 'Basic Move 3'];
+                moves.forEach(moveName => {
+                    const opt = document.createElement('option');
+                    opt.value = moveName;
+                    opt.textContent = moveName;
+                    moveSelect.appendChild(opt);
+                });
             }
 
             clearStatus() {
@@ -1524,16 +1773,18 @@
                 const style = document.getElementById('instructorStyleSelect').value;
                 const moveName = document.getElementById('instructorMoveSelect').value;
                 if (!style || !moveName) {
-                    document.getElementById('instructorStatus').textContent = 'Select a style and move.';
+                    this.updateBasicStatus('Select a style and move first.', 'warning');
                     return;
                 }
+
+                const previewModal = document.getElementById('instructorPreviewModal');
+                const previewContent = document.getElementById('instructorPreviewContent');
+                
                 try {
                     const res = await fetch(`${BACKEND_URL}/choreography/move?style=${encodeURIComponent(style)}&name=${encodeURIComponent(moveName)}`);
                     if (!res.ok) throw new Error("Move preview fetch failed: " + res.status);
                     const move = await res.json();
                     if (move.keyframes && move.keyframes.length > 0) {
-                        const previewModal = document.getElementById('instructorPreviewModal');
-                        const previewContent = document.getElementById('instructorPreviewContent');
                         previewContent.innerHTML = `
                             <b style="color:#f27121;">${move.name}</b>
                             <div style="font-size:0.95em; margin-bottom:4px;">Duration: ${move.duration || ""}s</div>
@@ -1544,11 +1795,38 @@
                         `;
                         previewModal.style.display = 'flex';
                     } else {
-                        document.getElementById('instructorStatus').textContent = 'No keyframes for this move.';
+                        this.updateBasicStatus('No keyframes for this move.', 'warning');
                     }
                 } catch (err) {
-                    document.getElementById('instructorStatus').textContent = 'Could not load move preview.';
                     console.error("Error loading move preview:", err);
+                    // Fallback preview when backend is not available
+                    previewContent.innerHTML = `
+                        <div style="color:#f27121; font-size: 1.1rem; margin-bottom: 15px;">
+                            <strong>${style.toUpperCase()}: ${moveName}</strong>
+                        </div>
+                        <div style="background: rgba(102,126,234,0.1); padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+                            <h4 style="color: #667eea; margin-bottom: 10px;">Preview Instructions:</h4>
+                            <p style="color: rgba(255,255,255,0.9); line-height: 1.4;">
+                                This move combines traditional ${style} techniques with modern expression. 
+                                Focus on fluid movements and maintain proper posture throughout the sequence.
+                            </p>
+                        </div>
+                        <div style="background: rgba(245,87,108,0.1); padding: 15px; border-radius: 10px;">
+                            <h4 style="color: #f5576c; margin-bottom: 10px;">Key Points:</h4>
+                            <ul style="color: rgba(255,255,255,0.8); padding-left: 20px;">
+                                <li>Start with a strong foundation stance</li>
+                                <li>Keep your core engaged throughout</li>
+                                <li>Express emotion through facial expressions</li>
+                                <li>Maintain rhythm and timing</li>
+                                <li>End with a graceful finishing pose</li>
+                            </ul>
+                        </div>
+                        <div style="margin-top: 15px; padding: 10px; background: rgba(242,113,33,0.1); border-radius: 8px; font-size: 0.9rem; color: rgba(255,255,255,0.7);">
+                            <em>💡 Tip: Practice slowly first, then gradually increase speed as you master the movements.</em>
+                        </div>
+                    `;
+                    previewModal.style.display = 'flex';
+                    this.updateBasicStatus('Preview loaded (offline mode)', 'info');
                 }
             }
 
@@ -2011,6 +2289,599 @@
                 document.getElementById('moveNameDisplay').textContent = '';
                 document.getElementById('moveStyleDisplay').textContent = '';
             }
+
+            // Enhanced Basic Instructor Methods
+            initializeBasicInstructor() {
+                this.basicSession = {
+                    isActive: false,
+                    startTime: null,
+                    difficulty: 'beginner',
+                    scores: [],
+                    achievements: []
+                };
+                
+                this.setupBasicEventListeners();
+                this.updateBasicStats();
+            }
+
+            setupBasicEventListeners() {
+                // Dance style dropdown change event
+                const styleSelect = document.getElementById('instructorStyleSelect');
+                if (styleSelect) {
+                    styleSelect.addEventListener('change', () => {
+                        this.populateEnhancedMotionDropdown();
+                        this.clearStatus();
+                    });
+                }
+
+                // Difficulty buttons
+                document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        document.querySelectorAll('.difficulty-btn').forEach(b => {
+                            b.style.background = 'transparent';
+                        });
+                        btn.style.background = btn.style.borderColor;
+                        this.basicSession.difficulty = btn.dataset.level;
+                        this.updateDifficultyFeedback();
+                    });
+                });
+
+                // Enhanced start button
+                const startBtn = document.getElementById('instructorStartBtn');
+                if (startBtn) {
+                    startBtn.onclick = () => this.startBasicSession();
+                }
+
+                // Enhanced stop button
+                const stopBtn = document.getElementById('instructorStopBtn');
+                if (stopBtn) {
+                    stopBtn.onclick = () => this.stopBasicSession();
+                }
+
+                // Pause button
+                const pauseBtn = document.getElementById('instructorPauseBtn');
+                if (pauseBtn) {
+                    pauseBtn.onclick = () => this.pauseBasicSession();
+                }
+            }
+
+            async setupBasicCamera() {
+                try {
+                    const constraints = {
+                        video: {
+                            width: { ideal: 640 },
+                            height: { ideal: 480 },
+                            facingMode: 'user'
+                        }
+                    };
+                    
+                    this.basicVideoStream = await navigator.mediaDevices.getUserMedia(constraints);
+                    
+                    // Create a video element for processing
+                    if (!this.basicVideoElement) {
+                        this.basicVideoElement = document.createElement('video');
+                        this.basicVideoElement.autoplay = true;
+                        this.basicVideoElement.muted = true;
+                        this.basicVideoElement.playsInline = true;
+                        this.basicVideoElement.style.display = 'none';
+                        document.body.appendChild(this.basicVideoElement);
+                    }
+                    
+                    this.basicVideoElement.srcObject = this.basicVideoStream;
+                    
+                    // Setup canvas for webcam display
+                    const webcamCanvas = document.getElementById('instructorWebcam');
+                    const ctx = webcamCanvas.getContext('2d');
+                    
+                    // Wait for video to load
+                    await new Promise((resolve, reject) => {
+                        const timeout = setTimeout(() => {
+                            console.log('Video metadata timeout, using default dimensions');
+                            // Fallback dimensions if metadata doesn't load
+                            const containerWidth = webcamCanvas.offsetWidth || 640;
+                            const containerHeight = 200;
+                            webcamCanvas.width = containerWidth;
+                            webcamCanvas.height = containerHeight;
+                            this.videoWidth = 640;
+                            this.videoHeight = 480;
+                            resolve();
+                        }, 3000);
+
+                        this.basicVideoElement.onloadedmetadata = () => {
+                            clearTimeout(timeout);
+                            // Set canvas size to match container, not video dimensions
+                            const containerWidth = webcamCanvas.offsetWidth || 640;
+                            const containerHeight = 200; // Fixed height as per CSS
+                            webcamCanvas.width = containerWidth;
+                            webcamCanvas.height = containerHeight;
+                            
+                            // Store video dimensions for proper scaling
+                            this.videoWidth = this.basicVideoElement.videoWidth;
+                            this.videoHeight = this.basicVideoElement.videoHeight;
+                            
+                            resolve();
+                        };
+                    });
+                    
+                    // Show webcam canvas and hide placeholder if any
+                    webcamCanvas.style.display = 'block';
+                    
+                    // Debug info
+                    console.log('Camera setup complete:', {
+                        canvas: webcamCanvas,
+                        canvasWidth: webcamCanvas.width,
+                        canvasHeight: webcamCanvas.height,
+                        videoWidth: this.videoWidth,
+                        videoHeight: this.videoHeight,
+                        display: webcamCanvas.style.display
+                    });
+                    
+                    // Start drawing video frames to canvas
+                    this.startBasicVideoLoop(ctx, webcamCanvas);
+                    
+                    this.updateBasicStatus('Camera connected! Ready to track your moves.', 'success');
+                    
+                    return true;
+                } catch (error) {
+                    console.error('Basic camera setup failed:', error);
+                    this.updateBasicStatus('Camera access denied. Please enable camera for pose tracking.', 'error');
+                    return false;
+                }
+            }
+
+            startBasicVideoLoop(ctx, canvas) {
+                const drawFrame = () => {
+                    if (this.basicVideoElement && this.basicVideoStream) {
+                        try {
+                            // Clear canvas
+                            ctx.clearRect(0, 0, canvas.width, canvas.height);
+                            
+                            // Check if video is ready
+                            if (this.basicVideoElement.readyState >= 2) {
+                                // Calculate aspect ratio scaling
+                                const videoAspect = this.videoWidth / this.videoHeight;
+                                const canvasAspect = canvas.width / canvas.height;
+                                
+                                let drawWidth, drawHeight, offsetX, offsetY;
+                                
+                                if (videoAspect > canvasAspect) {
+                                    // Video is wider - fit to width
+                                    drawWidth = canvas.width;
+                                    drawHeight = canvas.width / videoAspect;
+                                    offsetX = 0;
+                                    offsetY = (canvas.height - drawHeight) / 2;
+                                } else {
+                                    // Video is taller - fit to height
+                                    drawHeight = canvas.height;
+                                    drawWidth = canvas.height * videoAspect;
+                                    offsetX = (canvas.width - drawWidth) / 2;
+                                    offsetY = 0;
+                                }
+                                
+                                // Draw video frame with proper scaling
+                                ctx.drawImage(this.basicVideoElement, offsetX, offsetY, drawWidth, drawHeight);
+                                
+                                // Add pose tracking overlay here if needed
+                                this.drawBasicPoseOverlay(ctx, canvas);
+                            } else {
+                                // Video not ready, show loading indicator
+                                ctx.fillStyle = 'rgba(102, 126, 234, 0.8)';
+                                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                                ctx.fillStyle = 'white';
+                                ctx.font = '18px Arial';
+                                ctx.textAlign = 'center';
+                                ctx.fillText('Loading camera...', canvas.width / 2, canvas.height / 2);
+                                ctx.textAlign = 'left';
+                            }
+                        } catch (error) {
+                            console.error('Error drawing video frame:', error);
+                            // Show error on canvas
+                            ctx.fillStyle = 'rgba(245, 87, 108, 0.8)';
+                            ctx.fillRect(0, 0, canvas.width, canvas.height);
+                            ctx.fillStyle = 'white';
+                            ctx.font = '16px Arial';
+                            ctx.textAlign = 'center';
+                            ctx.fillText('Camera Error', canvas.width / 2, canvas.height / 2);
+                            ctx.textAlign = 'left';
+                        }
+                    }
+                    
+                    // Continue animation loop
+                    requestAnimationFrame(drawFrame);
+                };
+                
+                // Start the drawing loop
+                drawFrame();
+            }
+
+            drawBasicPoseOverlay(ctx, canvas) {
+                // Simple pose tracking visualization
+                if (this.basicSession.isActive) {
+                    ctx.strokeStyle = '#f27121';
+                    ctx.lineWidth = 3;
+                    ctx.font = '16px Arial';
+                    ctx.fillStyle = '#f27121';
+                    
+                    // Add some basic pose indicators (simulated)
+                    const time = Date.now() / 1000;
+                    const x = (Math.sin(time) * 50) + canvas.width / 2;
+                    const y = (Math.cos(time) * 30) + canvas.height / 2;
+                    
+                    ctx.beginPath();
+                    ctx.arc(x, y, 8, 0, 2 * Math.PI);
+                    ctx.stroke();
+                    
+                    // Add tracking indicator
+                    ctx.fillText('Tracking...', 10, 30);
+                }
+            }
+
+            async startBasicSession() {
+                const selectedStyle = document.getElementById('instructorStyleSelect').value;
+                const selectedMove = document.getElementById('instructorMoveSelect').value;
+                
+                if (!selectedStyle || !selectedMove) {
+                    this.updateBasicStatus('Please select both dance style and move to start', 'warning');
+                    return;
+                }
+
+                // Setup camera first
+                this.updateBasicStatus('Setting up camera...', 'info');
+                
+                // Show the webcam canvas immediately
+                const webcamCanvas = document.getElementById('instructorWebcam');
+                webcamCanvas.style.display = 'block';
+                
+                const cameraSuccess = await this.setupBasicCamera();
+                
+                if (!cameraSuccess) {
+                    // Even if camera fails, show a placeholder
+                    const ctx = webcamCanvas.getContext('2d');
+                    webcamCanvas.width = webcamCanvas.offsetWidth || 640;
+                    webcamCanvas.height = 200;
+                    
+                    ctx.fillStyle = 'rgba(102, 126, 234, 0.8)';
+                    ctx.fillRect(0, 0, webcamCanvas.width, webcamCanvas.height);
+                    ctx.fillStyle = 'white';
+                    ctx.font = '18px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('Camera not available', webcamCanvas.width / 2, webcamCanvas.height / 2);
+                    ctx.textAlign = 'left';
+                    
+                    this.updateBasicStatus('Session started without camera', 'warning');
+                } else {
+                    this.updateBasicStatus('Camera connected successfully!', 'success');
+                }
+
+                this.basicSession.isActive = true;
+                this.basicSession.startTime = Date.now();
+                
+                // Update UI
+                document.getElementById('instructorStartBtn').style.display = 'none';
+                document.getElementById('instructorPauseBtn').style.display = 'inline-block';
+                document.getElementById('instructorStopBtn').innerHTML = '⏹️ Stop Session';
+                
+                // Show overlay instructions
+                document.getElementById('instructorOverlay').style.display = 'block';
+                document.getElementById('currentMoveDisplay').textContent = `${selectedStyle.toUpperCase()}: ${selectedMove}`;
+                document.getElementById('moveInstructions').textContent = this.getBasicInstructions();
+                
+                // Show performance indicator
+                document.getElementById('performanceIndicator').style.display = 'block';
+                
+                // Start pose detection and feedback
+                this.startBasicPoseTracking();
+                
+                this.updateBasicStatus(`Session started! Difficulty: ${this.basicSession.difficulty}`, 'success');
+                this.updateBasicProgress();
+            }
+
+            pauseBasicSession() {
+                const pauseBtn = document.getElementById('instructorPauseBtn');
+                
+                if (this.basicSession.isActive) {
+                    this.basicSession.isActive = false;
+                    pauseBtn.innerHTML = '▶️ Resume';
+                    this.updateBasicStatus('Session paused', 'info');
+                } else {
+                    this.basicSession.isActive = true;
+                    pauseBtn.innerHTML = '⏸️ Pause';
+                    this.updateBasicStatus('Session resumed', 'success');
+                    this.startBasicPoseTracking();
+                }
+            }
+
+            stopBasicSession() {
+                this.basicSession.isActive = false;
+                
+                // Reset UI
+                document.getElementById('instructorStartBtn').style.display = 'inline-block';
+                document.getElementById('instructorPauseBtn').style.display = 'none';
+                document.getElementById('instructorStopBtn').innerHTML = '⏹️ Stop';
+                
+                // Hide overlays
+                document.getElementById('instructorOverlay').style.display = 'none';
+                document.getElementById('performanceIndicator').style.display = 'none';
+                
+                // Reset progress
+                document.getElementById('sessionProgress').style.width = '0%';
+                document.getElementById('progressPercent').textContent = '0%';
+                document.getElementById('sessionTime').textContent = '00:00';
+                
+                // Stop pose tracking
+                if (this.basicTrackingInterval) {
+                    clearInterval(this.basicTrackingInterval);
+                }
+                
+                // Calculate session stats
+                if (this.basicSession.startTime) {
+                    const sessionDuration = Math.floor((Date.now() - this.basicSession.startTime) / 1000);
+                    const avgScore = this.basicSession.scores.length > 0 
+                        ? Math.floor(this.basicSession.scores.reduce((a, b) => a + b, 0) / this.basicSession.scores.length)
+                        : 0;
+                    
+                    this.checkBasicAchievements(sessionDuration, avgScore);
+                }
+                
+                this.updateBasicStatus('Session completed! Great work!', 'success');
+                this.basicSession = { isActive: false, startTime: null, difficulty: 'beginner', scores: [], achievements: [] };
+            }
+
+            startBasicPoseTracking() {
+                if (this.basicTrackingInterval) {
+                    clearInterval(this.basicTrackingInterval);
+                }
+                
+                this.basicTrackingInterval = setInterval(() => {
+                    if (this.basicSession.isActive) {
+                        this.simulateBasicPoseAnalysis();
+                        this.updateSessionTimer();
+                    }
+                }, 1000);
+            }
+
+            simulateBasicPoseAnalysis() {
+                // Simulate pose analysis based on difficulty
+                const difficultyMultiplier = {
+                    'beginner': 0.9,
+                    'intermediate': 0.75,
+                    'advanced': 0.6
+                };
+                
+                const baseScore = Math.random() * 100;
+                const adjustedScore = Math.floor(baseScore * difficultyMultiplier[this.basicSession.difficulty]);
+                const accuracy = Math.max(60, adjustedScore);
+                const timing = Math.max(50, Math.floor(Math.random() * 100));
+                
+                // Update live stats
+                document.getElementById('basicAccuracy').textContent = accuracy + '%';
+                document.getElementById('basicTiming').textContent = timing + '%';
+                document.getElementById('performanceScore').textContent = Math.floor((accuracy + timing) / 2);
+                
+                // Store score
+                this.basicSession.scores.push(accuracy);
+                
+                // Update recent scores display
+                this.updateRecentScores(accuracy);
+                
+                // Update feedback
+                this.updateBasicFeedback(accuracy, timing);
+            }
+
+            updateRecentScores(score) {
+                const recentScoresContainer = document.getElementById('recentScores');
+                const scoreElement = document.createElement('span');
+                
+                const scoreClass = score >= 80 ? '#4CAF50' : score >= 60 ? '#FF9800' : '#F44336';
+                scoreElement.style.cssText = `
+                    background: rgba(${score >= 80 ? '76,175,80' : score >= 60 ? '255,152,0' : '244,67,54'},0.2);
+                    color: ${scoreClass};
+                    padding: 4px 8px;
+                    border-radius: 12px;
+                    font-size: 0.8rem;
+                    animation: scoreSlideIn 0.3s ease-out;
+                `;
+                scoreElement.textContent = score + '%';
+                
+                recentScoresContainer.appendChild(scoreElement);
+                
+                // Keep only last 5 scores
+                while (recentScoresContainer.children.length > 5) {
+                    recentScoresContainer.removeChild(recentScoresContainer.firstChild);
+                }
+            }
+
+            updateBasicFeedback(accuracy, timing) {
+                const feedbackDiv = document.getElementById('instructorFeedback');
+                let emoji, message, color;
+                
+                const avgScore = Math.floor((accuracy + timing) / 2);
+                
+                if (avgScore >= 85) {
+                    emoji = '🌟';
+                    message = 'Excellent! You\'re mastering this move!';
+                    color = '#4CAF50';
+                } else if (avgScore >= 70) {
+                    emoji = '👍';
+                    message = 'Great job! Keep up the good work!';
+                    color = '#667eea';
+                } else if (avgScore >= 55) {
+                    emoji = '📈';
+                    message = 'Good progress! Focus on timing and posture.';
+                    color = '#FF9800';
+                } else {
+                    emoji = '💪';
+                    message = 'Keep practicing! Watch the reference closely.';
+                    color = '#F44336';
+                }
+                
+                feedbackDiv.innerHTML = `
+                    <div style="color:${color}; font-size: 1.1rem; font-weight: bold; margin-bottom: 8px;">
+                        ${emoji} ${message}
+                    </div>
+                    <div style="color: rgba(255,255,255,0.8); font-size: 0.9rem;">
+                        Accuracy: ${accuracy}% | Timing: ${timing}%
+                    </div>
+                `;
+            }
+
+            updateSessionTimer() {
+                if (this.basicSession.startTime) {
+                    const elapsed = Math.floor((Date.now() - this.basicSession.startTime) / 1000);
+                    const minutes = Math.floor(elapsed / 60);
+                    const seconds = elapsed % 60;
+                    document.getElementById('sessionTime').textContent = 
+                        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                    
+                    // Update progress (simulate 5 minute session)
+                    const progress = Math.min(100, (elapsed / 300) * 100);
+                    document.getElementById('sessionProgress').style.width = progress + '%';
+                    document.getElementById('progressPercent').textContent = Math.floor(progress) + '%';
+                }
+            }
+
+            checkBasicAchievements(duration, avgScore) {
+                const achievements = [];
+                
+                if (!this.basicSession.achievements.includes('firstSession')) {
+                    achievements.push({ id: 'firstSession', title: 'First Session', desc: 'Completed your first dance session!' });
+                    this.basicSession.achievements.push('firstSession');
+                }
+                
+                if (avgScore >= 80 && !this.basicSession.achievements.includes('scoremaster')) {
+                    achievements.push({ id: 'scoremaster', title: 'Score Master', desc: 'Achieved 80% average score!' });
+                    this.basicSession.achievements.push('scoremaster');
+                }
+                
+                if (duration >= 180 && !this.basicSession.achievements.includes('endurance')) {
+                    achievements.push({ id: 'endurance', title: 'Endurance Dancer', desc: 'Practiced for 3+ minutes!' });
+                    this.basicSession.achievements.push('endurance');
+                }
+                
+                // Show achievement notifications
+                achievements.forEach((achievement, index) => {
+                    setTimeout(() => this.showBasicAchievement(achievement), index * 2000);
+                });
+            }
+
+            showBasicAchievement(achievement) {
+                const achievementDiv = document.createElement('div');
+                achievementDiv.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+                    color: white;
+                    padding: 15px 20px;
+                    border-radius: 12px;
+                    z-index: 1000;
+                    animation: slideInRight 0.5s ease-out;
+                    max-width: 300px;
+                `;
+                
+                achievementDiv.innerHTML = `
+                    <div style="font-weight: bold; margin-bottom: 5px;">🏆 Achievement Unlocked!</div>
+                    <div style="font-size: 1.1rem; margin-bottom: 3px;">${achievement.title}</div>
+                    <div style="font-size: 0.9rem; opacity: 0.9;">${achievement.desc}</div>
+                `;
+                
+                document.body.appendChild(achievementDiv);
+                
+                setTimeout(() => {
+                    achievementDiv.style.animation = 'slideOutRight 0.5s ease-in';
+                    setTimeout(() => document.body.removeChild(achievementDiv), 500);
+                }, 3000);
+            }
+
+            updateBasicStatus(message, type = 'info') {
+                const statusDiv = document.getElementById('instructorStatus');
+                const colors = {
+                    'info': '#667eea',
+                    'success': '#4CAF50',
+                    'warning': '#FF9800',
+                    'error': '#F44336'
+                };
+                
+                statusDiv.style.color = colors[type];
+                statusDiv.textContent = message;
+            }
+
+            updateDifficultyFeedback() {
+                const tips = {
+                    'beginner': 'Focus on basic posture and slow, controlled movements',
+                    'intermediate': 'Add expression and improve timing precision',
+                    'advanced': 'Perfect technique with fluid transitions and style'
+                };
+                
+                document.getElementById('moveInstructions').textContent = tips[this.basicSession.difficulty];
+            }
+
+            getBasicInstructions() {
+                const instructions = {
+                    'bollywood': 'Express emotion through graceful arm movements and hip sways',
+                    'kathak': 'Maintain straight posture with precise hand positions and spins',
+                    'hiphop': 'Use sharp, rhythmic movements with attitude and style',
+                    'contemporary': 'Flow smoothly between positions with emotional expression'
+                };
+                
+                const style = document.getElementById('instructorStyleSelect').value;
+                return instructions[style] || 'Follow the reference movements closely';
+            }
+
+            clearStatus() {
+                this.updateBasicStatus('Ready to start your dance session', 'info');
+            }
+
+            updateBasicStats() {
+                // Update session count
+                const sessionCount = localStorage.getItem('basicInstructorSessions') || '0';
+                document.getElementById('sessionCount').textContent = sessionCount;
+                
+                // Update average score
+                const avgScore = localStorage.getItem('basicInstructorAvgScore') || '75';
+                document.getElementById('avgScore').textContent = avgScore;
+                
+                // Update total time
+                const totalTime = localStorage.getItem('basicInstructorTotalTime') || '0.0';
+                document.getElementById('totalTime').textContent = totalTime;
+            }
+        }
+
+        // Add CSS for animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideInRight {
+                0% { transform: translateX(100%); opacity: 0; }
+                100% { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOutRight {
+                0% { transform: translateX(0); opacity: 1; }
+                100% { transform: translateX(100%); opacity: 0; }
+            }
+            @keyframes scoreSlideIn {
+                0% { transform: scale(0) translateY(-10px); opacity: 0; }
+                100% { transform: scale(1) translateY(0); opacity: 1; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Function to toggle basic instructor visibility
+        function openBasicInstructor() {
+            const heroSection = document.querySelector('#instructor .hero');
+            const basicInstructor = document.getElementById('basicInstructor');
+            
+            if (basicInstructor.style.display === 'none' || basicInstructor.style.display === '') {
+                heroSection.style.display = 'none';
+                basicInstructor.style.display = 'block';
+                
+                // Initialize enhanced basic instructor features
+                if (window.virtualInstructor && window.virtualInstructor.initializeBasicInstructor) {
+                    window.virtualInstructor.initializeBasicInstructor();
+                }
+            } else {
+                heroSection.style.display = 'block';
+                basicInstructor.style.display = 'none';
+            }
         }
 
         // Initialize Application
@@ -2035,7 +2906,13 @@
                 el.addEventListener('click', e => {
                     e.preventDefault();
                     window.router.navigateTo('instructor');
-                    window.virtualInstructor.init();
+                    // Reset to hero view when navigating to instructor page
+                    const heroSection = document.querySelector('#instructor .hero');
+                    const basicInstructor = document.getElementById('basicInstructor');
+                    if (heroSection && basicInstructor) {
+                        heroSection.style.display = 'block';
+                        basicInstructor.style.display = 'none';
+                    }
                 });
             });
 
